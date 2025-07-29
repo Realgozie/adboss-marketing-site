@@ -32,6 +32,18 @@ localPort = 5173
 externalPort = 5173
 exposeLocalhost = true
 
+[workflows]
+runButton = "Dev Server"
+
+[[workflows.workflow]]
+name = "Dev Server"
+author = 44770562
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
 # Optional: remove or update these if you're not using Vite dev server directly anymore
 # [[ports]]
 # localPort = 5173

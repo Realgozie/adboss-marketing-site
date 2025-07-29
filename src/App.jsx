@@ -48,6 +48,22 @@ const Home = () => (
   </>
 );
 
+// Features page
+const FeaturesPage = () => (
+  <>
+    <Features />
+    <Footer />
+  </>
+);
+
+// Testimonials page
+const TestimonialsPage = () => (
+  <>
+    <Testimonials />
+    <Footer />
+  </>
+);
+
 // Main App component
 function App() {
   useEffect(() => {
@@ -55,10 +71,12 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter basename="/">
+    <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/login" element={<Login />} />

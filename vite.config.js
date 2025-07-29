@@ -18,6 +18,8 @@ export default defineConfig({
     outDir: "dist",
   },
   server: {
+    host: "0.0.0.0",
+    port: 5173,
     // ✅ Allow all hosts (Replit, custom preview domains, etc.)
     allowedHosts: "all",
   },

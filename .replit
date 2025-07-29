@@ -42,7 +42,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "npm run dev -- --host 0.0.0.0 --port 5173"
 
 # Optional: remove or update these if you're not using Vite dev server directly anymore
 # [[ports]]

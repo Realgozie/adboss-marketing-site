@@ -7,6 +7,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// 👇 Add your Replit hostname below
+const allowedReplitHost =
+  "44a449ab-7c87-40b8-bc12-6ea0ce7ed7f9-00-3ff4q9ithgr9r.riker.replit.dev";
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -26,7 +30,9 @@ export default defineConfig({
       host: "0.0.0.0",
     },
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      "Access-Control-Allow-Origin": "*",
     },
+    // 👇 Add this line
+    allowedHosts: [allowedReplitHost],
   },
 });

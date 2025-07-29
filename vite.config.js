@@ -20,10 +20,13 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5000,
-    // ✅ Allow all hosts (Replit, custom preview domains, etc.)
-    allowedHosts: "all",
+    strictPort: true,
     hmr: {
-      clientPort: 5000,
+      port: 5000,
+      host: "0.0.0.0",
+    },
+    headers: {
+      'Access-Control-Allow-Origin': '*',
     },
   },
 });

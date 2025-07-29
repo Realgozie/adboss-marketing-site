@@ -1,4 +1,4 @@
-entrypoint = "index.js"
+entrypoint = "server.js"
 modules = ["nodejs-22"]
 hidden = [".config", "package-lock.json"]
 
@@ -9,6 +9,34 @@ requiredFiles = [".replit", "replit.nix", "package.json", "package-lock.json"]
 channel = "stable-24_11"
 
 [deployment]
-run = ["node", "index.js"]
+run = "npm run build && node server.js"
 deploymentTarget = "autoscale"
 ignorePorts = false
+
+onBoot = "npm run build && node server.js"
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 3001
+externalPort = 3001
+
+[[ports]]
+localPort = 3002
+externalPort = 3002
+
+[[ports]]
+localPort = 5173
+externalPort = 5173
+exposeLocalhost = true
+
+# Optional: remove or update these if you're not using Vite dev server directly anymore
+# [[ports]]
+# localPort = 5173
+# externalPort = 80
+
+# [[ports]]
+# localPort = 5174
+# externalPort = 3000

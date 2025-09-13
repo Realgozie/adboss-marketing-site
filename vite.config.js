@@ -23,13 +23,13 @@ export default defineConfig({
   },
   server: {
     host: "0.0.0.0", // ✅ Required by Replit
-    port: 3002, // ✅ Matches your .replit file
+    port: 5000, // ✅ Required port for Replit
     strictPort: true,
-    allowedHosts: [allowedReplitHost], // ✅ Allow Replit hostname
+    allowedHosts: true, // ✅ Allow all hosts
     hmr: {
       protocol: "wss", // ✅ Use wss on Replit HTTPS
       host: allowedReplitHost, // ✅ Your actual Replit domain
-      port: 3002, // ✅ HMR port should match your Vite dev port
+      port: 5000, // ✅ HMR port should match your Vite dev port
     },
     headers: {
       "Access-Control-Allow-Origin": "*",

@@ -23,7 +23,8 @@ app.post("/api/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    const users = (await db.get("users")) || [];
+    const userData = await db.get("users");
+    const users = Array.isArray(userData) ? userData : [];
     const userExists = users.some((u) => u.email === email);
     
     if (userExists) {
@@ -46,7 +47,8 @@ app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const users = (await db.get("users")) || [];
+    const userData = await db.get("users");
+    const users = Array.isArray(userData) ? userData : [];
     const user = users.find((u) => u.email === email && u.password === password);
     
     if (user) {

@@ -7,9 +7,6 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Use environment variable for Replit hostname
-const allowedReplitHost = process.env.REPLIT_DEV_DOMAIN;
-
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -25,11 +22,7 @@ export default defineConfig({
     port: 5000, // ✅ Required port for Replit
     strictPort: true,
     allowedHosts: true, // ✅ Allow all hosts
-    hmr: {
-      protocol: "wss", // ✅ Use wss on Replit HTTPS
-      host: allowedReplitHost, // ✅ Your actual Replit domain
-      clientPort: 443, // ✅ Use HTTPS proxy port for client connections
-    },
+    hmr: true, // ✅ Let Vite handle HMR automatically
     headers: {
       "Access-Control-Allow-Origin": "*",
     },

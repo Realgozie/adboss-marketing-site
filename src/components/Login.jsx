@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import db from "../utils/db";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,16 +11,21 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const users = (await db.get("users")) || [];
-      const match = users.find(
-        (user) => user.email === email && user.password === password,
-      );
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (match) {
-        localStorage.setItem("user", JSON.stringify(match)); // Save to localStorage
-        navigate("/dashboard"); // ✅ Redirect to dashboard
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/dashboard");
       } else {
-        setError("Invalid email or password");
+        setError(data.message || "Invalid email or password");
       }
     } catch (err) {
       console.error("Login error:", err);

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import db from "../utils/db"; // ✅ Replit DB
 
 export default function Register() {
   const navigate = useNavigate();
@@ -34,26 +33,32 @@ export default function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Submit handler using Replit DB
+  // ✅ Submit handler using API
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     try {
-      const users = (await db.get("users")) || [];
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-      const userExists = users.some((u) => u.email === formData.email);
-      if (userExists) {
-        alert("A user with this email already exists.");
-        return;
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Registration successful!");
+        navigate("/thank-you");
+      } else {
+        alert(data.message || "Registration failed. Please try again.");
       }
-
-      // Save new user
-      const updatedUsers = [...users, formData];
-      await db.set("users", updatedUsers);
-
-      alert("Registration successful!");
-      navigate("/thank-you");
     } catch (error) {
       console.error("Registration error:", error);
       alert("Something went wrong. Please try again.");

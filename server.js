@@ -20,20 +20,42 @@ app.use(express.static(path.join(__dirname, "dist")));
 
 // ✅ API: Register route
 app.post("/api/register", async (req, res) => {
-  const { name, email } = req.body;
+  const { name, email, password } = req.body;
 
   try {
-    const existing = await db.get(email);
-    if (existing) {
+    const users = (await db.get("users")) || [];
+    const userExists = users.some((u) => u.email === email);
+    
+    if (userExists) {
       return res
         .status(400)
         .json({ success: false, message: "Email already exists" });
     }
 
-    await db.set(email, { name, email });
+    const updatedUsers = [...users, { name, email, password }];
+    await db.set("users", updatedUsers);
     res.json({ success: true, message: "User registered successfully" });
   } catch (err) {
     console.error("Error in /api/register:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// ✅ API: Login route
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const users = (await db.get("users")) || [];
+    const user = users.find((u) => u.email === email && u.password === password);
+    
+    if (user) {
+      res.json({ success: true, message: "Login successful", user });
+    } else {
+      res.status(401).json({ success: false, message: "Invalid email or password" });
+    }
+  } catch (err) {
+    console.error("Error in /api/login:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });

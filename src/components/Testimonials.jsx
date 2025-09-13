@@ -18,7 +18,8 @@ export default function Testimonials() {
         <h3 className="text-2xl font-bold mb-8">What Our Users Say</h3>
 
         {/* ✅ Testimonials */}
-        <blockquote className="mb-6" data-aos="fade-up">
+        {/* data-aos="fade-up" */}
+        <blockquote className="mb-6">
           <p className="italic">
             "AdBOSS helped us double our ad ROI in just 3 months, here’s the
             place to be!"
@@ -27,7 +28,9 @@ export default function Testimonials() {
             — Solomon Chigozie Nwapa, Startup Founder
           </span>
         </blockquote>
-        <blockquote data-aos="fade-up" data-aos-delay="100">
+
+        {/* data-aos="fade-up" data-aos-delay="100" */}
+        <blockquote>
           <p className="italic">
             "The insights and automation save us hours every week and so highly
             dependable."

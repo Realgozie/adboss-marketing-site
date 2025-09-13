@@ -33,12 +33,13 @@ export default function CTA() {
         </p>
       </div>
 
-      <button 
+      <a
         ref={buttonRef}
-        className={`bg-white text-[#787160] px-6 py-3 font-semibold rounded-lg hover:bg-gray-100 transition animate-slide-right ${buttonVisible ? 'visible' : ''}`}
+        href="#contact"
+        className={`bg-white text-[#787160] px-6 py-3 font-semibold rounded-lg hover:bg-gray-100 transition animate-slide-right ${buttonVisible ? 'visible' : ''} inline-block`}
       >
         Get Started Now
-      </button>
+      </a>
     </section>
   );
 }

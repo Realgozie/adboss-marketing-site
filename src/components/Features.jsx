@@ -1,8 +1,14 @@
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import featuresImg from "../assets/features-1.jpg";
+import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
 export default function Features() {
+  const [headerRef, headerVisible] = useScrollAnimation(0.2);
+  const [textRef, textVisible] = useScrollAnimation(0.2);
+  const [imageRef, imageVisible] = useScrollAnimation(0.3);
+  const [gridRef, gridVisible] = useScrollAnimation(0.1);
+
   const features = [
     {
       title: "Smart Ads",
@@ -32,20 +38,25 @@ export default function Features() {
       className="py-20 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100"
     >
       <div className="max-w-6xl mx-auto px-4">
-        {/* data-aos="fade-up" */}
-        <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">
+        <h2 
+          ref={headerRef}
+          className={`text-3xl font-bold text-center mb-4 text-gray-800 animate-fade-in ${headerVisible ? 'visible' : ''}`}
+        >
           Our Features
         </h2>
 
-        {/* data-aos="fade-up" data-aos-delay="100" */}
-        <p className="text-gray-700 text-center mb-8 max-w-2xl mx-auto">
+        <p 
+          ref={textRef}
+          className={`text-gray-700 text-center mb-8 max-w-2xl mx-auto animate-fade-in ${textVisible ? 'visible' : ''}`}
+        >
           Use AI-driven tools to supercharge your ad campaigns and reach the
           right audience.
         </p>
 
-        {/* ✅ Image above feature list */}
-        {/* data-aos="zoom-in" */}
-        <div className="flex justify-center mb-12">
+        <div 
+          ref={imageRef}
+          className={`flex justify-center mb-12 animate-scale ${imageVisible ? 'visible' : ''}`}
+        >
           <img
             src={featuresImg}
             alt="AdBOSS Features"
@@ -53,12 +64,15 @@ export default function Features() {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
+        <div 
+          ref={gridRef}
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10 animate-fade-in ${gridVisible ? 'visible' : ''}`}
+        >
           {features.map((feature, index) => (
-            // data-aos="fade-up" data-aos-delay={feature.delay}
             <div
               key={index}
-              className="flex items-start space-x-4 bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300 ease-in-out"
+              className={`flex items-start space-x-4 bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-300 ease-in-out animate-slide-${index % 2 === 0 ? 'left' : 'right'} ${gridVisible ? 'visible' : ''}`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
               <CheckCircleIcon className="h-6 w-6 text-blue-600 mt-1" />
               <div>

@@ -13,23 +13,35 @@ export default function Hero() {
         <img
           src={heroImage}
           alt="Marketing Team"
-          className="mx-auto rounded-lg shadow-lg mb-6"
+          className="mx-auto rounded-lg shadow-lg mb-6 animate-fadeIn"
+          style={{ animationDelay: "0.3s", animationFillMode: "both" }}
         />
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-fadeIn"
+            style={{ animationDelay: "0.6s", animationFillMode: "both" }}>
           Grow Your Business with{" "}
           <span className="text-white font-bold">AdBOSS</span>
         </h2>
-        <p className="text-lg md:text-xl mb-6">
+        <p className="text-lg md:text-xl mb-6 animate-fadeIn"
+           style={{ animationDelay: "0.9s", animationFillMode: "both" }}>
           We help you generate more leads, conversions, and revenue.
         </p>
 
-        {/* ✅ Replace button with working Link */}
-        <Link
-          to="/register"
-          className="bg-white text-blue-600 px-6 py-3 rounded hover:bg-gray-200 transition inline-block"
-        >
-          Get Started
-        </Link>
+        {/* ✅ Action buttons */}
+        <div className="space-x-4 animate-fadeIn" 
+             style={{ animationDelay: "1.2s", animationFillMode: "both" }}>
+          <Link
+            to="/register"
+            className="bg-white text-blue-600 px-6 py-3 rounded hover:bg-gray-200 transition inline-block"
+          >
+            Get Started
+          </Link>
+          <Link
+            to="/login"
+            className="bg-transparent border-2 border-white text-white px-6 py-3 rounded hover:bg-white hover:text-blue-600 transition inline-block"
+          >
+            Login
+          </Link>
+        </div>
       </div>
     </section>
   );

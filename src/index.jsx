@@ -4,9 +4,24 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./styles/tailwind.css";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const rootEl = document.getElementById('root');
+rootEl.textContent = 'Mounting...';
+
+try {
+  const root = ReactDOM.createRoot(rootEl);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+} catch (e) {
+  rootEl.textContent = 'Mount failed: ' + (e?.stack || e);
+}
+
+window.addEventListener('error', e => {
+  rootEl.textContent = 'Error: ' + (e?.error?.stack || e.message);
+});
+
+window.addEventListener('unhandledrejection', e => {
+  rootEl.textContent = 'Promise: ' + (e?.reason?.stack || e.reason);
+});

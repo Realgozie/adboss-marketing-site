@@ -16,12 +16,12 @@ localPort = 33001
 externalPort = 3000
 
 [[ports]]
-localPort = 40875
-externalPort = 3001
+localPort = 38151
+externalPort = 3003
 
 [[ports]]
-localPort = 40899
-externalPort = 3003
+localPort = 40875
+externalPort = 3001
 
 [[ports]]
 localPort = 41055
@@ -48,7 +48,7 @@ args = "Backend Server"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Frontend"
+args = "Website"
 
 [[workflows.workflow]]
 name = "Backend Server"
@@ -63,7 +63,7 @@ waitForPort = 3002
 outputType = "console"
 
 [[workflows.workflow]]
-name = "Frontend"
+name = "Website"
 author = "agent"
 
 [[workflows.workflow.tasks]]

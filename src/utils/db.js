@@ -1,5 +1,5 @@
 // /src/utils/db.js
-import { Database } from "replit";
+import Client from "@replit/database";
 
-const db = new Database();
+const db = new Client();
 export default db;

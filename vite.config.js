@@ -7,9 +7,8 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Use your actual Replit public hostname
-const allowedReplitHost =
-  "44a449ab-7c87-40b8-bc12-6ea0ce7ed7f9-00-3ff4q9ithgr9r.riker.replit.dev";
+// ✅ Use environment variable for Replit hostname
+const allowedReplitHost = process.env.REPLIT_DEV_DOMAIN;
 
 export default defineConfig({
   plugins: [react()],
@@ -29,7 +28,7 @@ export default defineConfig({
     hmr: {
       protocol: "wss", // ✅ Use wss on Replit HTTPS
       host: allowedReplitHost, // ✅ Your actual Replit domain
-      port: 5000, // ✅ HMR port should match your Vite dev port
+      clientPort: 443, // ✅ Use HTTPS proxy port for client connections
     },
     headers: {
       "Access-Control-Allow-Origin": "*",

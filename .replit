@@ -16,10 +16,6 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 40875
-externalPort = 3001
-
-[[ports]]
 localPort = 41055
 externalPort = 80
 
@@ -40,15 +36,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Production Website"
+args = "Development Server"
 
 [[workflows.workflow]]
-name = "Production Website"
+name = "Development Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node server.js"
+args = "npm run dev"
 waitForPort = 5000
 
 [workflows.workflow.metadata]

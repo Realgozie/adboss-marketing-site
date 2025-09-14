@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const db = new Database();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3002;
 
 app.use(cors());
 app.use(express.json());

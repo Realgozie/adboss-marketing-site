@@ -23,7 +23,7 @@ export default function Login() {
 
       if (data.success) {
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/dashboard");
+        navigate("/dashboard"); // ✅ Redirect after login
       } else {
         setError(data.message || "Invalid email or password");
       }

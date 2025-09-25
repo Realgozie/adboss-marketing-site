@@ -13,7 +13,7 @@ export default function Register() {
 
   const [errors, setErrors] = useState({});
 
-  // ✅ Validation logic
+  // ✅ Validation
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required";
@@ -33,7 +33,7 @@ export default function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Submit handler using API
+  // ✅ Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -54,8 +54,8 @@ export default function Register() {
       const data = await response.json();
 
       if (data.success) {
-        alert("Registration successful!");
-        navigate("/thank-you");
+        alert("🎉 Registration successful! Please login.");
+        navigate("/login");
       } else {
         alert(data.message || "Registration failed. Please try again.");
       }

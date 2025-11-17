@@ -1,0 +1,39 @@
+import Database from "@replit/database";
+import bcrypt from "bcrypt";
+
+const db = new Database();
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
+  }
+
+  let { name, email, password } = req.body;
+  email = email.toLowerCase().trim();
+  password = password.trim();
+
+  try {
+    const userData = await db.get("users");
+    const users = Array.isArray(userData) ? userData : [];
+
+    const userExists = users.some((u) => u.email === email);
+    if (userExists) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const updatedUsers = [...users, { name, email, password: hashedPassword }];
+    await db.set("users", updatedUsers);
+
+    res
+      .status(200)
+      .json({ success: true, message: "User registered successfully" });
+  } catch (err) {
+    console.error("Error in /api/register:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}

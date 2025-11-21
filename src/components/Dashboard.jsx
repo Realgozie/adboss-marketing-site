@@ -4,7 +4,17 @@ import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  
+  let user = null;
+  try {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      user = JSON.parse(userData);
+    }
+  } catch (error) {
+    console.error("Error parsing user data:", error);
+    localStorage.removeItem("user");
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("user");

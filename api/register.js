@@ -7,12 +7,13 @@ const db = new Database();
 
 export default async function handler(req, res) {
   let { name, email, password } = req.body;
+  
   email = email.toLowerCase().trim();
   password = password.trim();
 
   try {
     const userData = await db.get("users");
-    const users = Array.isArray(userData) ? userData : [];
+    const users = Array.isArray(userData) ? userData : (userData?.value || []);
 
     const userExists = users.some((u) => u.email === email);
     if (userExists) {
@@ -23,6 +24,7 @@ export default async function handler(req, res) {
     const updatedUsers = [...users, { name, email, password: hashedPassword }];
     await db.set("users", updatedUsers);
 
+    console.log("User registered successfully:", email);
     return res.status(201).json({ success: true, message: "User registered successfully" });
   } catch (err) {
     console.error("Error in /api/register:", err);

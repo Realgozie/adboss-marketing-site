@@ -1,4 +1,5 @@
 
+
 import Database from "@replit/database";
 import bcrypt from "bcrypt";
 
@@ -17,16 +18,17 @@ export default async function handler(req, res) {
     const valid = user ? await bcrypt.compare(password, user.password) : false;
 
     if (user && valid) {
-      res.json({
+      return res.status(200).json({
         success: true,
         message: "Login successful",
         user: { name: user.name, email: user.email },
       });
     } else {
-      res.json({ success: false, message: "Invalid email or password" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
   } catch (err) {
     console.error("Error in /api/login:", err);
-    res.json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
+

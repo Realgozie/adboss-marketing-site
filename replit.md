@@ -8,6 +8,26 @@ AdBoss is a marketing website built as a single-page application using React and
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (November 21, 2025)
+
+### Authentication Bug Fix
+- **Issue Resolved**: Login was failing even with correct credentials after successful registration
+- **Root Cause**: Replit Database returns responses in format `{ok: true, value: [...]}` but code expected direct array access
+- **Solution**: Updated both `/api/register.js` and `/api/login.js` to handle both response formats
+- **Status**: Fully tested and working correctly
+
+### Security Improvements
+- Added error handling for localStorage parsing in Dashboard component
+- Prevents crashes from corrupted session data
+- Automatic cleanup of invalid localStorage entries
+
+### Deployment Preparation
+- Created comprehensive deployment guide (DEPLOYMENT.md)
+- Created GitHub setup instructions (GITHUB_SETUP.md)
+- Updated .gitignore to allow dist folder for deployment
+- Configured for Vercel serverless functions
+- **Important**: Replit Database must be replaced with cloud database for Vercel deployment (instructions provided)
+
 ## System Architecture
 
 ### Frontend Architecture

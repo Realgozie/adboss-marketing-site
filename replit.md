@@ -21,12 +21,13 @@ Preferred communication style: Simple, everyday language.
 - Prevents crashes from corrupted session data
 - Automatic cleanup of invalid localStorage entries
 
-### Deployment Preparation
-- Created comprehensive deployment guide (DEPLOYMENT.md)
-- Created GitHub setup instructions (GITHUB_SETUP.md)
-- Updated .gitignore to allow dist folder for deployment
-- Configured for Vercel serverless functions
-- **Important**: Replit Database must be replaced with cloud database for Vercel deployment (instructions provided)
+### Deployment Configuration (December 12, 2025)
+- Configured project for Replit deployment (Autoscale)
+- Updated server.js to serve both API and static files in production
+- Build command: `npm run build`
+- Run command: `node server.js`
+- Single workflow serving frontend and backend on port 5000
+- Ready to publish via Replit's "Publish" button
 
 ## System Architecture
 

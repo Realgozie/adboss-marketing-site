@@ -3,9 +3,10 @@ modules = ["nodejs-22"]
 hidden = [".config", "package-lock.json"]
 
 [deployment]
-run = "npm run build && node server.js"
+run = ["node", "server.js"]
 deploymentTarget = "autoscale"
 onBoot = "npm run build && node server.js"
+build = ["npm", "run", "build"]
 
 [[ports]]
 localPort = 3002
@@ -32,31 +33,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Backend API"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Frontend Dev Server"
+args = "Web Server"
 
 [[workflows.workflow]]
-name = "Backend API"
+name = "Web Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node server.js"
-waitForPort = 3002
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
-name = "Frontend Dev Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
 waitForPort = 5000
 
 [workflows.workflow.metadata]

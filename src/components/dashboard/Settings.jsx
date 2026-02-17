@@ -1,6 +1,7 @@
 // src/components/dashboard/Settings.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { toast } from "react-hot-toast";
 
 export default function Settings({ user }) {
   const [formData, setFormData] = useState({
@@ -9,9 +10,15 @@ export default function Settings({ user }) {
   });
 
   const handleSave = () => {
-    // In a real app, this would be an API call
-    localStorage.setItem("user", JSON.stringify({ ...user, ...formData }));
-    alert("Profile updated successfully!");
+    try {
+      if (!formData.name.trim()) throw new Error("Name is required");
+      if (!formData.email.includes("@")) throw new Error("Invalid email");
+      
+      localStorage.setItem("user", JSON.stringify({ ...user, ...formData }));
+      toast.success("Profile updated successfully!");
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
 
   return (

@@ -9,6 +9,8 @@ import {
 import Sidebar from "./dashboard/Sidebar";
 import Home from "./dashboard/Home";
 import Settings from "./dashboard/Settings";
+import Campaigns from "./dashboard/Campaigns";
+import Messages from "./dashboard/Messages";
 import { cn } from "../lib/utils";
 
 export default function Dashboard() {
@@ -93,6 +95,8 @@ export default function Dashboard() {
         <main className="p-8">
           <AnimatePresence mode="wait">
             {activeTab === "overview" && <Home />}
+            {activeTab === "campaigns" && <Campaigns />}
+            {activeTab === "messages" && <Messages />}
             {activeTab === "settings" && <Settings user={user} />}
           </AnimatePresence>
         </main>

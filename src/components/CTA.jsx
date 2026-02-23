@@ -1,5 +1,6 @@
 import React from "react";
-import ctaBanner from "../assets/cta-banner.jpg"; // ✅ Image import
+import { Link } from "react-router-dom";
+import ctaBanner from "../assets/cta-banner.jpg"; 
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
 export default function CTA() {
@@ -33,13 +34,13 @@ export default function CTA() {
         </p>
       </div>
 
-      <a
+      <Link
         ref={buttonRef}
-        href="#contact"
+        to="/register"
         className={`bg-white text-[#787160] px-6 py-3 font-semibold rounded-lg hover:bg-gray-100 transition animate-slide-right ${buttonVisible ? 'visible' : ''} inline-block`}
       >
         Get Started Now
-      </a>
+      </Link>
     </section>
   );
 }

@@ -9,6 +9,8 @@ import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import GlobalErrorBoundary from "./components/dashboard/ErrorBoundary";
 
+import { PrivacyPolicy, TermsOfService, About } from "./components/Legal";
+
 export default function App() {
   return (
     <GlobalErrorBoundary>
@@ -22,6 +24,9 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </BrowserRouter>
     </GlobalErrorBoundary>

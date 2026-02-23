@@ -11,6 +11,7 @@ import Home from "./dashboard/Home";
 import Settings from "./dashboard/Settings";
 import Campaigns from "./dashboard/Campaigns";
 import Messages from "./dashboard/Messages";
+import { About } from "./Legal";
 import { cn } from "../lib/utils";
 
 export default function Dashboard() {
@@ -98,6 +99,7 @@ export default function Dashboard() {
             {activeTab === "campaigns" && <Campaigns />}
             {activeTab === "messages" && <Messages />}
             {activeTab === "settings" && <Settings user={user} />}
+            {activeTab === "about" && <About />}
           </AnimatePresence>
         </main>
       </div>

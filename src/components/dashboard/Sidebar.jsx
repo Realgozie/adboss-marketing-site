@@ -15,6 +15,7 @@ const menuItems = [
   { id: "campaigns", name: 'Campaigns', icon: UsersIcon },
   { id: "messages", name: 'Messages', icon: EnvelopeIcon },
   { id: "settings", name: 'Settings', icon: Cog6ToothIcon },
+  { id: "about", name: 'About AdBoss', icon: ChartBarIcon },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, onLogout }) {

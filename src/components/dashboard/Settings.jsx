@@ -8,7 +8,6 @@ import {
   BellIcon,
   CreditCardIcon,
   UserGroupIcon,
-  Cog6ToothIcon,
   PlusIcon,
   TrashIcon,
   DevicePhoneMobileIcon,
@@ -20,16 +19,16 @@ import {
 import { cn } from "../../lib/utils";
 
 const Toggle = ({ enabled, onChange, label, description }) => (
-  <div className="flex items-center justify-between py-4 border-b border-slate-100 last:border-0">
+  <div className="flex items-center justify-between py-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
     <div>
-      <p className="text-sm font-bold text-slate-800">{label}</p>
-      {description && <p className="text-xs text-slate-400 mt-0.5 font-medium">{description}</p>}
+      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{label}</p>
+      {description && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">{description}</p>}
     </div>
     <button
       onClick={() => onChange(!enabled)}
       className={cn(
         "relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ml-4",
-        enabled ? "bg-blue-600" : "bg-slate-200"
+        enabled ? "bg-blue-600" : "bg-slate-200 dark:bg-slate-700"
       )}
     >
       <motion.div
@@ -44,7 +43,6 @@ const Toggle = ({ enabled, onChange, label, description }) => (
 export default function Settings({ user }) {
   const [activeTab, setActiveTab] = useState("profile");
 
-  // Profile state
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -53,24 +51,16 @@ export default function Settings({ user }) {
     timezone: "UTC+1 West Africa Time",
   });
 
-  // Security state
   const [passwords, setPasswords] = useState({ current: "", newPass: "", confirm: "" });
   const [showPass, setShowPass] = useState({ current: false, new: false, confirm: false });
   const [twoFactor, setTwoFactor] = useState(false);
 
-  // Notifications state
   const [notifs, setNotifs] = useState({
-    emailCampaign: true,
-    emailLeads: true,
-    emailBilling: true,
-    pushAlerts: false,
-    weeklyDigest: true,
-    securityAlerts: true,
-    productUpdates: false,
-    marketingTips: true,
+    emailCampaign: true, emailLeads: true, emailBilling: true,
+    pushAlerts: false, securityAlerts: true,
+    weeklyDigest: true, productUpdates: false, marketingTips: true,
   });
 
-  // Team state
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("Editor");
   const [teamMembers, setTeamMembers] = useState([
@@ -123,13 +113,13 @@ export default function Settings({ user }) {
     { id: "team", name: "Team Members", icon: UserGroupIcon },
   ];
 
-  const inputClass = "w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all font-medium outline-none text-sm";
+  const inputClass = "w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all font-medium outline-none text-sm text-slate-900 dark:text-white placeholder:text-slate-400";
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
       {/* Settings Nav */}
       <div className="w-full lg:w-64 shrink-0">
-        <h2 className="text-2xl font-black text-slate-900 mb-6 tracking-tight">Settings</h2>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">Settings</h2>
         <nav className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
           {tabs.map((tab) => (
             <button
@@ -138,8 +128,8 @@ export default function Settings({ user }) {
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm whitespace-nowrap shrink-0 lg:w-full",
                 activeTab === tab.id
-                  ? "bg-white text-blue-600 shadow-sm border border-slate-200"
-                  : "text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent"
+                  ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200 dark:border-slate-700"
+                  : "text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border border-transparent"
               )}
             >
               <tab.icon className="h-4 w-4 shrink-0" />
@@ -158,39 +148,39 @@ export default function Settings({ user }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden"
           >
 
             {/* ── PROFILE ── */}
             {activeTab === "profile" && (
               <div>
-                <div className="px-8 py-6 border-b border-slate-100">
+                <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-5">
                     <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-100 shrink-0">
                       {formData.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-900">Personal Information</h3>
-                      <p className="text-slate-400 text-sm font-medium">Update your profile and account details.</p>
+                      <h3 className="text-lg font-black text-slate-900 dark:text-white">Personal Information</h3>
+                      <p className="text-slate-400 dark:text-slate-500 text-sm font-medium">Update your profile and account details.</p>
                     </div>
                   </div>
                 </div>
                 <div className="p-8 space-y-5">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Full Name</label>
+                      <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Full Name</label>
                       <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Email Address</label>
+                      <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Email Address</label>
                       <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Company</label>
+                      <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Company</label>
                       <input type="text" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} className={inputClass} />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Timezone</label>
+                      <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Timezone</label>
                       <select value={formData.timezone} onChange={(e) => setFormData({ ...formData, timezone: e.target.value })} className={inputClass}>
                         <option>UTC+1 West Africa Time</option>
                         <option>UTC+0 Greenwich Mean Time</option>
@@ -200,12 +190,12 @@ export default function Settings({ user }) {
                       </select>
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
-                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Role</label>
-                      <input type="text" value={formData.role} disabled className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl font-medium text-slate-400 cursor-not-allowed text-sm" />
+                      <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Role</label>
+                      <input type="text" value={formData.role} disabled className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-400 dark:text-slate-500 cursor-not-allowed text-sm" />
                     </div>
                   </div>
                   <div className="flex justify-end gap-3 pt-2">
-                    <button onClick={() => setFormData({ name: user?.name || "", email: user?.email || "", company: "AdBOSS Marketing", role: "Administrator", timezone: "UTC+1 West Africa Time" })} className="px-6 py-2.5 text-sm font-bold text-slate-400 hover:text-slate-900 transition-colors">Reset</button>
+                    <button onClick={() => setFormData({ name: user?.name || "", email: user?.email || "", company: "AdBOSS Marketing", role: "Administrator", timezone: "UTC+1 West Africa Time" })} className="px-6 py-2.5 text-sm font-bold text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Reset</button>
                     <button onClick={handleSaveProfile} className="px-8 py-2.5 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-100">Save Changes</button>
                   </div>
                 </div>
@@ -215,15 +205,13 @@ export default function Settings({ user }) {
             {/* ── SECURITY ── */}
             {activeTab === "security" && (
               <div>
-                <div className="px-8 py-6 border-b border-slate-100">
-                  <h3 className="text-lg font-black text-slate-900">Security Settings</h3>
-                  <p className="text-slate-400 text-sm font-medium mt-0.5">Manage your password and account security.</p>
+                <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Security Settings</h3>
+                  <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-0.5">Manage your password and account security.</p>
                 </div>
                 <div className="p-8 space-y-8">
-
-                  {/* Change Password */}
                   <div>
-                    <h4 className="text-sm font-black text-slate-700 uppercase tracking-widest mb-4">Change Password</h4>
+                    <h4 className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-4">Change Password</h4>
                     <div className="space-y-4">
                       {[
                         { key: "current", label: "Current Password", show: showPass.current, toggle: () => setShowPass(p => ({ ...p, current: !p.current })), value: passwords.current, onChange: (v) => setPasswords(p => ({ ...p, current: v })) },
@@ -231,7 +219,7 @@ export default function Settings({ user }) {
                         { key: "confirm", label: "Confirm New Password", show: showPass.confirm, toggle: () => setShowPass(p => ({ ...p, confirm: !p.confirm })), value: passwords.confirm, onChange: (v) => setPasswords(p => ({ ...p, confirm: v })) },
                       ].map((field) => (
                         <div key={field.key} className="space-y-1.5">
-                          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{field.label}</label>
+                          <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{field.label}</label>
                           <div className="relative">
                             <input
                               type={field.show ? "text" : "password"}
@@ -240,72 +228,69 @@ export default function Settings({ user }) {
                               placeholder="••••••••"
                               className={inputClass + " pr-12"}
                             />
-                            <button onClick={field.toggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                            <button onClick={field.toggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
                               {field.show ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
                             </button>
                           </div>
                         </div>
                       ))}
                       {passwords.newPass && (
-                        <div className="flex gap-1.5 mt-2">
+                        <div className="flex gap-1.5 mt-2 flex-wrap">
                           {["Length (8+)", "Uppercase", "Number", "Symbol"].map((req, i) => {
                             const checks = [passwords.newPass.length >= 8, /[A-Z]/.test(passwords.newPass), /[0-9]/.test(passwords.newPass), /[^A-Za-z0-9]/.test(passwords.newPass)];
                             return (
-                              <span key={i} className={cn("text-[10px] font-bold px-2 py-1 rounded-full", checks[i] ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400")}>
+                              <span key={i} className={cn("text-[10px] font-bold px-2 py-1 rounded-full", checks[i] ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" : "bg-slate-100 dark:bg-slate-800 text-slate-400")}>
                                 {checks[i] ? "✓ " : ""}{req}
                               </span>
                             );
                           })}
                         </div>
                       )}
-                      <button onClick={handleChangePassword} className="mt-2 px-8 py-2.5 bg-slate-900 text-white rounded-xl font-black text-sm hover:bg-blue-600 transition-all active:scale-95">Update Password</button>
+                      <button onClick={handleChangePassword} className="mt-2 px-8 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-blue-600 transition-all active:scale-95">Update Password</button>
                     </div>
                   </div>
 
-                  {/* Two-Factor Auth */}
-                  <div className="border-t border-slate-100 pt-8">
-                    <h4 className="text-sm font-black text-slate-700 uppercase tracking-widest mb-4">Two-Factor Authentication</h4>
-                    <div className="flex items-start justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-8">
+                    <h4 className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-4">Two-Factor Authentication</h4>
+                    <div className="flex items-start justify-between p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
                       <div className="flex items-start gap-4">
-                        <div className={cn("p-3 rounded-xl shrink-0", twoFactor ? "bg-emerald-100 text-emerald-600" : "bg-slate-200 text-slate-500")}>
+                        <div className={cn("p-3 rounded-xl shrink-0", twoFactor ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400")}>
                           <ShieldCheckIcon className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-bold text-slate-900 text-sm">{twoFactor ? "2FA is Enabled" : "2FA is Disabled"}</p>
-                          <p className="text-xs text-slate-400 font-medium mt-0.5">Add an extra layer of security using your phone.</p>
+                          <p className="font-bold text-slate-900 dark:text-white text-sm">{twoFactor ? "2FA is Enabled" : "2FA is Disabled"}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Add an extra layer of security using your phone.</p>
                         </div>
                       </div>
                       <button
                         onClick={() => { setTwoFactor(!twoFactor); toast.success(twoFactor ? "2FA disabled" : "2FA enabled!"); }}
-                        className={cn("shrink-0 px-4 py-2 rounded-xl font-black text-xs transition-all active:scale-95", twoFactor ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-blue-600 text-white hover:bg-blue-700")}
+                        className={cn("shrink-0 px-4 py-2 rounded-xl font-black text-xs transition-all active:scale-95", twoFactor ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50" : "bg-blue-600 text-white hover:bg-blue-700")}
                       >
                         {twoFactor ? "Disable 2FA" : "Enable 2FA"}
                       </button>
                     </div>
                   </div>
 
-                  {/* Active Sessions */}
-                  <div className="border-t border-slate-100 pt-8">
-                    <h4 className="text-sm font-black text-slate-700 uppercase tracking-widest mb-4">Active Sessions</h4>
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-8">
+                    <h4 className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-4">Active Sessions</h4>
                     <div className="space-y-3">
                       {[
                         { device: "Chrome on Windows", location: "Lagos, Nigeria", time: "Current session", icon: ComputerDesktopIcon, current: true },
                         { device: "Safari on iPhone", location: "Abuja, Nigeria", time: "2 hours ago", icon: DevicePhoneMobileIcon, current: false },
                       ].map((session, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                        <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 bg-slate-100 rounded-lg text-slate-500">
+                            <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400">
                               <session.icon className="h-4 w-4" />
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-slate-800">{session.device}</p>
-                              <p className="text-xs text-slate-400 font-medium">{session.location} · {session.time}</p>
+                              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{session.device}</p>
+                              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{session.location} · {session.time}</p>
                             </div>
                           </div>
                           {session.current ? (
-                            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                              Active
+                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>Active
                             </span>
                           ) : (
                             <button onClick={() => toast.success("Session revoked")} className="text-xs font-bold text-red-500 hover:underline">Revoke</button>
@@ -315,13 +300,12 @@ export default function Settings({ user }) {
                     </div>
                   </div>
 
-                  {/* Danger Zone */}
-                  <div className="border-t border-red-100 pt-8">
+                  <div className="border-t border-red-100 dark:border-red-900/30 pt-8">
                     <h4 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4">Danger Zone</h4>
-                    <div className="p-5 rounded-2xl border border-red-100 bg-red-50/50 flex items-center justify-between">
+                    <div className="p-5 rounded-2xl border border-red-100 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10 flex items-center justify-between">
                       <div>
-                        <p className="font-bold text-slate-900 text-sm">Delete Account</p>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">Permanently delete your account and all data.</p>
+                        <p className="font-bold text-slate-900 dark:text-white text-sm">Delete Account</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Permanently delete your account and all data.</p>
                       </div>
                       <button onClick={() => toast.error("Please contact support to delete your account.")} className="px-4 py-2 bg-red-600 text-white rounded-xl font-black text-xs hover:bg-red-700 transition-all active:scale-95">Delete Account</button>
                     </div>
@@ -333,9 +317,9 @@ export default function Settings({ user }) {
             {/* ── BILLING ── */}
             {activeTab === "billing" && (
               <div>
-                <div className="px-8 py-6 border-b border-slate-100">
-                  <h3 className="text-lg font-black text-slate-900">Plan & Billing</h3>
-                  <p className="text-slate-400 text-sm font-medium mt-0.5">Manage your subscription and payment details.</p>
+                <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Plan & Billing</h3>
+                  <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-0.5">Manage your subscription and payment details.</p>
                 </div>
                 <div className="p-8 space-y-6">
                   <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white">
@@ -355,27 +339,27 @@ export default function Settings({ user }) {
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button onClick={() => toast.success("Redirecting to billing portal...")} className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-left transition-all group">
-                      <p className="font-black text-slate-900 text-sm group-hover:text-blue-600 transition-colors">Manage Subscription</p>
-                      <p className="text-xs text-slate-400 mt-0.5 font-medium">Upgrade, downgrade or cancel</p>
+                    <button onClick={() => toast.success("Redirecting to billing portal...")} className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left transition-all group">
+                      <p className="font-black text-slate-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Manage Subscription</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">Upgrade, downgrade or cancel</p>
                     </button>
-                    <button onClick={() => toast.success("Opening payment method editor...")} className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-left transition-all group">
-                      <p className="font-black text-slate-900 text-sm group-hover:text-blue-600 transition-colors">Payment Method</p>
-                      <p className="text-xs text-slate-400 mt-0.5 font-medium">Visa ending in •••• 4242</p>
+                    <button onClick={() => toast.success("Opening payment method editor...")} className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left transition-all group">
+                      <p className="font-black text-slate-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Payment Method</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">Visa ending in •••• 4242</p>
                     </button>
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Recent Invoices</h4>
-                    <div className="divide-y divide-slate-100 rounded-xl border border-slate-100 overflow-hidden">
+                    <h4 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Recent Invoices</h4>
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
                       {[["Feb 12, 2026", "Pro Plan - Monthly", "$49.00"], ["Jan 12, 2026", "Pro Plan - Monthly", "$49.00"], ["Dec 12, 2025", "Pro Plan - Monthly", "$49.00"]].map(([date, desc, amount]) => (
-                        <div key={date} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors">
+                        <div key={date} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                           <div>
-                            <p className="text-sm font-bold text-slate-800">{desc}</p>
-                            <p className="text-xs text-slate-400 font-medium">{date}</p>
+                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{desc}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{date}</p>
                           </div>
                           <div className="flex items-center gap-4">
-                            <span className="font-black text-slate-900 text-sm">{amount}</span>
-                            <button onClick={() => toast.success("Downloading invoice...")} className="text-xs font-bold text-blue-600 hover:underline">Download</button>
+                            <span className="font-black text-slate-900 dark:text-white text-sm">{amount}</span>
+                            <button onClick={() => toast.success("Downloading invoice...")} className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">Download</button>
                           </div>
                         </div>
                       ))}
@@ -388,9 +372,9 @@ export default function Settings({ user }) {
             {/* ── NOTIFICATIONS ── */}
             {activeTab === "notifications" && (
               <div>
-                <div className="px-8 py-6 border-b border-slate-100">
-                  <h3 className="text-lg font-black text-slate-900">Notification Preferences</h3>
-                  <p className="text-slate-400 text-sm font-medium mt-0.5">Choose what updates and alerts you receive.</p>
+                <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Notification Preferences</h3>
+                  <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-0.5">Choose what updates and alerts you receive.</p>
                 </div>
                 <div className="p-8 space-y-8">
                   {[
@@ -419,8 +403,8 @@ export default function Settings({ user }) {
                     }
                   ].map((group) => (
                     <div key={group.title}>
-                      <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{group.title}</h4>
-                      <div className="rounded-xl border border-slate-100 overflow-hidden divide-y divide-slate-100 bg-slate-50/30 px-5">
+                      <h4 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">{group.title}</h4>
+                      <div className="rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 bg-slate-50/30 dark:bg-slate-800/20 px-5">
                         {group.items.map((item) => (
                           <Toggle
                             key={item.key}
@@ -443,28 +427,27 @@ export default function Settings({ user }) {
             {/* ── TEAM ── */}
             {activeTab === "team" && (
               <div>
-                <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+                <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-black text-slate-900">Team Members</h3>
-                    <p className="text-slate-400 text-sm font-medium mt-0.5">{teamMembers.length} of 5 seats used on your Pro plan.</p>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white">Team Members</h3>
+                    <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-0.5">{teamMembers.length} of 5 seats used on your Pro plan.</p>
                   </div>
                 </div>
                 <div className="p-8 space-y-6">
-                  {/* Invite Form */}
-                  <div className="bg-slate-50 rounded-2xl border border-slate-100 p-5">
-                    <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Invite New Member</h4>
+                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 p-5">
+                    <h4 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Invite New Member</h4>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="email"
                         value={inviteEmail}
                         onChange={(e) => setInviteEmail(e.target.value)}
                         placeholder="colleague@company.com"
-                        className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                        className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
                       />
                       <select
                         value={inviteRole}
                         onChange={(e) => setInviteRole(e.target.value)}
-                        className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        className="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-900 dark:text-white"
                       >
                         <option>Administrator</option>
                         <option>Editor</option>
@@ -480,43 +463,41 @@ export default function Settings({ user }) {
                     </div>
                   </div>
 
-                  {/* Members List */}
-                  <div className="divide-y divide-slate-100 rounded-xl border border-slate-100 overflow-hidden">
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
                     {teamMembers.map((member) => (
-                      <div key={member.id} className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-colors">
+                      <div key={member.id} className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <div className="flex items-center gap-3">
                           <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${member.color} flex items-center justify-center text-white font-black text-sm shrink-0`}>
                             {member.avatar}
                           </div>
                           <div>
-                            <p className="text-sm font-black text-slate-900">{member.name}</p>
-                            <p className="text-xs text-slate-400 font-medium">{member.email}</p>
+                            <p className="text-sm font-black text-slate-900 dark:text-white">{member.name}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{member.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className={cn(
                             "text-[10px] font-black px-2.5 py-1 rounded-full",
-                            member.status === "Active" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-600"
+                            member.status === "Active" ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" : "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
                           )}>
                             {member.status}
                           </span>
-                          <span className="text-xs font-bold text-slate-500 hidden sm:block">{member.role}</span>
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 hidden sm:block">{member.role}</span>
                           {member.id !== 1 && (
-                            <button onClick={() => handleRemoveMember(member.id)} className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                            <button onClick={() => handleRemoveMember(member.id)} className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
                               <TrashIcon className="h-4 w-4" />
                             </button>
                           )}
                           {member.id === 1 && (
-                            <span className="text-[10px] text-slate-400 font-bold px-2 py-1">You</span>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold px-2 py-1">You</span>
                           )}
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Role Guide */}
-                  <div className="rounded-xl bg-blue-50/50 border border-blue-100 p-5">
-                    <h4 className="text-xs font-black text-blue-700 uppercase tracking-widest mb-3">Role Permissions</h4>
+                  <div className="rounded-xl bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40 p-5">
+                    <h4 className="text-xs font-black text-blue-700 dark:text-blue-400 uppercase tracking-widest mb-3">Role Permissions</h4>
                     <div className="space-y-2">
                       {[
                         { role: "Administrator", desc: "Full access — manage campaigns, team, billing and settings." },
@@ -524,8 +505,8 @@ export default function Settings({ user }) {
                         { role: "Viewer", desc: "Read-only access to campaigns and analytics dashboards." },
                       ].map((r) => (
                         <div key={r.role} className="flex gap-3 items-start">
-                          <CheckCircleIcon className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
-                          <p className="text-xs text-slate-600 font-medium"><span className="font-black text-slate-800">{r.role}:</span> {r.desc}</p>
+                          <CheckCircleIcon className="h-4 w-4 text-blue-400 dark:text-blue-500 shrink-0 mt-0.5" />
+                          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium"><span className="font-black text-slate-800 dark:text-slate-200">{r.role}:</span> {r.desc}</p>
                         </div>
                       ))}
                     </div>

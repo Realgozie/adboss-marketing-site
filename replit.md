@@ -8,6 +8,15 @@ AdBoss is a marketing website built as a single-page application using React and
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (March 19, 2026)
+
+### Dark Mode (Full App)
+- Added `darkMode: "class"` to `tailwind.config.js`
+- Created `src/context/ThemeContext.jsx` — persists preference to `localStorage`, respects OS preference on first visit, toggles `dark` class on `<html>`
+- Wrapped `<App>` with `<ThemeProvider>` in `src/index.jsx`
+- Added moon/sun toggle button to both the landing page `Header` and the dashboard top bar
+- Applied `dark:` Tailwind variants to every page and component: Dashboard, StatsGrid, Home, Campaigns, Messages, Settings (all 5 tabs), Login, Register, Features, Testimonials, Contact, Footer
+
 ## Recent Changes (November 21, 2025)
 
 ### Authentication Bug Fix

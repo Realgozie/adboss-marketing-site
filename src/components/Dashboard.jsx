@@ -2,9 +2,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import {
   BellIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  Bars3Icon,
+  XMarkIcon,
+  Squares2X2Icon,
+  MegaphoneIcon,
+  EnvelopeIcon,
+  Cog6ToothIcon,
+  InformationCircleIcon,
+  ArrowRightOnRectangleIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "./dashboard/Sidebar";
 import Home from "./dashboard/Home";
@@ -12,12 +21,19 @@ import Settings from "./dashboard/Settings";
 import Campaigns from "./dashboard/Campaigns";
 import Messages from "./dashboard/Messages";
 import { About } from "./Legal";
-import { cn } from "../lib/utils";
+
+const mobileNavItems = [
+  { id: "overview", name: "Home", icon: Squares2X2Icon },
+  { id: "campaigns", name: "Campaigns", icon: MegaphoneIcon },
+  { id: "messages", name: "Messages", icon: EnvelopeIcon },
+  { id: "settings", name: "Settings", icon: Cog6ToothIcon },
+];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   let user = null;
   try {
     const userData = localStorage.getItem("user");
@@ -31,24 +47,27 @@ export default function Dashboard() {
     navigate("/login");
   };
 
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+  };
+
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
-        <motion.div 
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-6">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center p-10 bg-white shadow-xl rounded-2xl max-w-md border border-gray-100"
+          className="text-center p-10 bg-white shadow-xl rounded-3xl max-w-md border border-slate-100 w-full"
         >
-          <div className="text-red-500 mb-4 flex justify-center">
-            <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🔒</span>
-            </div>
+          <div className="h-16 w-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span className="text-3xl">🔒</span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
-          <p className="text-gray-600 mb-6">You need to be logged in to access the marketing dashboard.</p>
-          <button 
+          <h2 className="text-2xl font-black text-slate-900 mb-2">Access Denied</h2>
+          <p className="text-slate-500 mb-8 font-medium">You need to be logged in to access the marketing dashboard.</p>
+          <button
             onClick={() => navigate("/login")}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+            className="w-full bg-blue-600 text-white py-3.5 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
           >
             Login to AdBOSS
           </button>
@@ -58,51 +77,165 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-900 font-sans">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} user={user} />
+    <div className="min-h-screen bg-slate-50 flex font-sans">
+      {/* Desktop Sidebar */}
+      <Sidebar activeTab={activeTab} setActiveTab={switchTab} onLogout={handleLogout} user={user} />
+
+      {/* Mobile Slide-out Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            />
+            <motion.div
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed top-0 left-0 h-full w-72 bg-slate-900 z-50 lg:hidden flex flex-col"
+            >
+              <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+                    <SparklesIcon className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-white font-black text-lg">AdBOSS</span>
+                </div>
+                <button onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white p-1">
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
+
+              <nav className="flex-1 px-3 py-4 space-y-1">
+                {[
+                  { id: "overview", name: "Overview", icon: Squares2X2Icon },
+                  { id: "campaigns", name: "Campaigns", icon: MegaphoneIcon },
+                  { id: "messages", name: "Messages", icon: EnvelopeIcon, badge: 3 },
+                  { id: "settings", name: "Settings", icon: Cog6ToothIcon },
+                  { id: "about", name: "About AdBoss", icon: InformationCircleIcon },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => switchTab(item.id)}
+                    className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all text-sm font-semibold ${
+                      activeTab === item.id
+                        ? "bg-blue-600 text-white"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5 shrink-0" />
+                    <span>{item.name}</span>
+                    {item.badge && (
+                      <span className="ml-auto bg-blue-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </nav>
+
+              <div className="px-3 py-4 border-t border-slate-800">
+                <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-slate-800/60">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-black shrink-0">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-bold truncate">{user.name}</p>
+                    <p className="text-slate-500 text-[10px] truncate">{user.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all font-semibold text-sm"
+                >
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 h-20 flex items-center justify-between px-8 sticky top-0 z-10">
-          <div className="relative w-96 hidden md:block">
-            <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search data, campaigns..." 
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 text-sm transition-all"
-            />
+        {/* Top Header */}
+        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+          <div className="flex items-center gap-4">
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors"
+            >
+              <Bars3Icon className="h-5 w-5" />
+            </button>
+
+            <div className="relative hidden md:block">
+              <MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search campaigns, messages..."
+                className="w-72 pl-9 pr-4 py-2 bg-slate-100 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 text-sm transition-all outline-none"
+              />
+            </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <button className="relative p-2 text-slate-400 hover:text-blue-600 transition-colors">
-              <BellIcon className="h-6 w-6" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          <div className="flex items-center gap-3">
+            <button className="relative p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+              <BellIcon className="h-5 w-5" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            <div className="h-8 w-px bg-slate-200"></div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm font-bold text-slate-900">{user.name}</p>
-                <p className="text-xs text-slate-500">{user.email}</p>
+            <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
+            <button
+              onClick={() => switchTab("settings")}
+              className="flex items-center gap-2.5 hover:bg-slate-100 rounded-xl px-2 py-1.5 transition-colors cursor-pointer"
+            >
+              <div className="text-right hidden md:block">
+                <p className="text-sm font-bold text-slate-900 leading-none">{user.name}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">{user.email}</p>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-100">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-100">
                 {user.name.charAt(0).toUpperCase()}
               </div>
-            </div>
+            </button>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="p-8">
+        {/* Page Content */}
+        <main className="flex-1 p-4 md:p-8 pb-24 lg:pb-8 overflow-y-auto">
           <AnimatePresence mode="wait">
-            {activeTab === "overview" && <Home user={user} />}
-            {activeTab === "campaigns" && <Campaigns />}
-            {activeTab === "messages" && <Messages />}
-            {activeTab === "settings" && <Settings user={user} />}
-            {activeTab === "about" && <About />}
+            {activeTab === "overview" && <Home key="overview" user={user} setActiveTab={switchTab} />}
+            {activeTab === "campaigns" && <Campaigns key="campaigns" />}
+            {activeTab === "messages" && <Messages key="messages" />}
+            {activeTab === "settings" && <Settings key="settings" user={user} />}
+            {activeTab === "about" && <About key="about" />}
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 flex items-center justify-around px-2 py-2 safe-area-pb">
+        {mobileNavItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => switchTab(item.id)}
+            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all flex-1 ${
+              activeTab === item.id ? "text-blue-600" : "text-slate-400"
+            }`}
+          >
+            <item.icon className="h-5 w-5" />
+            <span className="text-[10px] font-bold">{item.name}</span>
+            {activeTab === item.id && (
+              <motion.div layoutId="mobile-tab" className="absolute bottom-1 w-1 h-1 bg-blue-600 rounded-full" />
+            )}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }

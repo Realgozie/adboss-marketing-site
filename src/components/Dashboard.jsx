@@ -59,7 +59,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex text-slate-900 font-sans">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} user={user} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -95,7 +95,7 @@ export default function Dashboard() {
         {/* Content */}
         <main className="p-8">
           <AnimatePresence mode="wait">
-            {activeTab === "overview" && <Home />}
+            {activeTab === "overview" && <Home user={user} />}
             {activeTab === "campaigns" && <Campaigns />}
             {activeTab === "messages" && <Messages />}
             {activeTab === "settings" && <Settings user={user} />}

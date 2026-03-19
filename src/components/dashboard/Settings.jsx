@@ -7,7 +7,8 @@ import {
   ShieldCheckIcon, 
   BellIcon, 
   CreditCardIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  Cog6ToothIcon
 } from "@heroicons/react/24/outline";
 import { cn } from "../../lib/utils";
 

@@ -32,11 +32,21 @@ const mobileNavItems = [
   { id: "settings", name: "Settings", icon: Cog6ToothIcon },
 ];
 
+const NOTIFS = [
+  { id: 1, title: "Campaign 'Summer Sale' went live", time: "2 min ago", color: "bg-emerald-500", read: false },
+  { id: 2, title: "14 new leads from Facebook Ads", time: "15 min ago", color: "bg-blue-500", read: false },
+  { id: 3, title: "Monthly analytics report is ready", time: "1 hour ago", color: "bg-violet-500", read: true },
+  { id: 4, title: "Your subscription renews in 3 days", time: "3 hours ago", color: "bg-amber-400", read: true },
+];
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { dark, toggle } = useTheme();
   const [activeTab, setActiveTab] = useState("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifs, setNotifs] = useState(NOTIFS);
+  const unreadCount = notifs.filter((n) => !n.read).length;
 
   let user = null;
   try {
@@ -179,10 +189,73 @@ export default function Dashboard() {
               {dark ? <SunIcon className="h-5 w-5 text-amber-400" /> : <MoonIcon className="h-5 w-5" />}
             </button>
 
-            <button className="relative p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-colors">
-              <BellIcon className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-            </button>
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => setNotifOpen((o) => !o)}
+                className="relative p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-colors"
+                aria-label="Notifications"
+              >
+                <BellIcon className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {notifOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-12 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 overflow-hidden"
+                    >
+                      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+                        <h4 className="font-black text-slate-900 dark:text-white text-sm">Notifications</h4>
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={() => setNotifs((prev) => prev.map((n) => ({ ...n, read: true })))}
+                            className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+                      <div className="divide-y divide-slate-50 dark:divide-slate-800 max-h-80 overflow-y-auto">
+                        {notifs.map((n) => (
+                          <button
+                            key={n.id}
+                            onClick={() => setNotifs((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x))}
+                            className={`w-full text-left flex items-start gap-3 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${!n.read ? "bg-blue-50/40 dark:bg-blue-900/10" : ""}`}
+                          >
+                            <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${n.read ? "bg-slate-300 dark:bg-slate-700" : n.color}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-xs font-bold leading-snug ${n.read ? "text-slate-500 dark:text-slate-400" : "text-slate-900 dark:text-white"}`}>
+                                {n.title}
+                              </p>
+                              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 font-medium">{n.time}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+                        <button
+                          onClick={() => { switchTab("messages"); setNotifOpen(false); }}
+                          className="w-full text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline text-center"
+                        >
+                          View all messages →
+                        </button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
             <button onClick={() => switchTab("settings")} className="flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl px-2 py-1.5 transition-colors cursor-pointer">
               <div className="text-right hidden md:block">
@@ -201,7 +274,7 @@ export default function Dashboard() {
           <AnimatePresence mode="wait">
             {activeTab === "overview" && <Home key="overview" user={user} setActiveTab={switchTab} />}
             {activeTab === "campaigns" && <Campaigns key="campaigns" />}
-            {activeTab === "messages" && <Messages key="messages" />}
+            {activeTab === "messages" && <Messages key="messages" user={user} />}
             {activeTab === "settings" && <Settings key="settings" user={user} />}
             {activeTab === "about" && <About key="about" />}
           </AnimatePresence>

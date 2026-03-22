@@ -1,5 +1,5 @@
 // src/components/dashboard/Settings.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import {
@@ -15,6 +15,8 @@ import {
   EyeIcon,
   EyeSlashIcon,
   CheckCircleIcon,
+  UsersIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { cn } from "../../lib/utils";
 
@@ -105,12 +107,36 @@ export default function Settings({ user }) {
     toast.success("Member removed");
   };
 
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+
+  const fetchUsers = async () => {
+    if (!user?.isAdmin) return;
+    setUsersLoading(true);
+    try {
+      const res = await fetch("/api/admin/users", {
+        headers: { "x-user-email": user.email },
+      });
+      const data = await res.json();
+      if (data.success) setRegisteredUsers(data.users);
+    } catch {
+      toast.error("Failed to load users");
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "users") fetchUsers();
+  }, [activeTab]);
+
   const tabs = [
     { id: "profile", name: "Account", icon: UserCircleIcon },
     { id: "security", name: "Security", icon: ShieldCheckIcon },
     { id: "billing", name: "Plan & Billing", icon: CreditCardIcon },
     { id: "notifications", name: "Notifications", icon: BellIcon },
     { id: "team", name: "Team Members", icon: UserGroupIcon },
+    ...(user?.isAdmin ? [{ id: "users", name: "Registered Users", icon: UsersIcon, adminBadge: true }] : []),
   ];
 
   const inputClass = "w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all font-medium outline-none text-sm text-slate-900 dark:text-white placeholder:text-slate-400";
@@ -134,6 +160,9 @@ export default function Settings({ user }) {
             >
               <tab.icon className="h-4 w-4 shrink-0" />
               <span>{tab.name}</span>
+              {tab.adminBadge && (
+                <span className="ml-auto text-[8px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded-full">ADMIN</span>
+              )}
             </button>
           ))}
         </nav>
@@ -512,6 +541,70 @@ export default function Settings({ user }) {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Admin: Registered Users */}
+            {activeTab === "users" && (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      <UsersIcon className="h-5 w-5 text-blue-500" />
+                      Registered Users
+                    </h3>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-medium">
+                      All accounts registered on your AdBOSS site
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-black px-3 py-1 rounded-full">
+                      {registeredUsers.length} total
+                    </span>
+                    <button onClick={fetchUsers} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                      <ArrowPathIcon className={`h-4 w-4 ${usersLoading ? "animate-spin" : ""}`} />
+                    </button>
+                  </div>
+                </div>
+                {usersLoading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <div className="w-7 h-7 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                  </div>
+                ) : registeredUsers.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center px-8">
+                    <UsersIcon className="h-10 w-10 text-slate-200 dark:text-slate-700 mb-3" />
+                    <p className="text-sm font-bold text-slate-400 dark:text-slate-500">No users found</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-50 dark:divide-slate-800">
+                    {registeredUsers.map((u, i) => (
+                      <div key={u.email} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${i === 0 ? "from-blue-500 to-indigo-600" : "from-slate-400 to-slate-600"} flex items-center justify-center text-white font-black text-sm shrink-0`}>
+                            {(u.name || u.email).charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                              {u.name || "—"}
+                              {u.isAdmin && (
+                                <span className="text-[9px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded-full">ADMIN</span>
+                              )}
+                            </p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium truncate">{u.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0 pl-13 sm:pl-0">
+                          <span className={`text-[10px] font-black px-2.5 py-1 rounded-full ${u.isVerified ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" : "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"}`}>
+                            {u.isVerified ? "Verified" : "Unverified"}
+                          </span>
+                          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                            {u.joinedAt ? new Date(u.joinedAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "Unknown"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </motion.div>

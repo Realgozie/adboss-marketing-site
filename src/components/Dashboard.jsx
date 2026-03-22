@@ -56,6 +56,8 @@ export default function Dashboard() {
     localStorage.removeItem("user");
   }
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/login");
@@ -93,7 +95,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex font-sans transition-colors duration-300">
       {/* Desktop Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={switchTab} onLogout={handleLogout} user={user} />
+      <Sidebar activeTab={activeTab} setActiveTab={switchTab} onLogout={() => setShowLogoutModal(true)} user={user} />
 
       {/* Mobile Slide-out Menu */}
       <AnimatePresence>
@@ -151,7 +153,7 @@ export default function Dashboard() {
                     <p className="text-slate-500 text-[10px] truncate">{user.email}</p>
                   </div>
                 </div>
-                <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all font-semibold text-sm">
+                <button onClick={() => setShowLogoutModal(true)} className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all font-semibold text-sm">
                   <ArrowRightOnRectangleIcon className="h-5 w-5" />
                   <span>Sign Out</span>
                 </button>
@@ -273,13 +275,55 @@ export default function Dashboard() {
         <main className="flex-1 p-4 md:p-8 pb-24 lg:pb-8 overflow-y-auto">
           <AnimatePresence mode="wait">
             {activeTab === "overview" && <Home key="overview" user={user} setActiveTab={switchTab} />}
-            {activeTab === "campaigns" && <Campaigns key="campaigns" />}
+            {activeTab === "campaigns" && <Campaigns key="campaigns" user={user} />}
             {activeTab === "messages" && <Messages key="messages" user={user} />}
             {activeTab === "settings" && <Settings key="settings" user={user} />}
             {activeTab === "about" && <About key="about" />}
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Sign Out Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              onClick={() => setShowLogoutModal(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ duration: 0.15 }}
+              className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm p-8 border border-slate-200 dark:border-slate-800 text-center"
+            >
+              <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <ArrowRightOnRectangleIcon className="h-7 w-7 text-red-500 dark:text-red-400" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Sign out?</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">
+                You'll need to log back in to access your dashboard.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 py-3 px-6 rounded-xl font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                >
+                  Stay
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 py-3 px-6 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-all active:scale-95 shadow-lg shadow-red-100"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-around px-2 py-2 transition-colors duration-300">

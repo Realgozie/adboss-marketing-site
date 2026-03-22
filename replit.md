@@ -8,6 +8,23 @@ AdBoss is a marketing website built as a single-page application using React and
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (March 22, 2026)
+
+### Major Feature Update
+- **Login page**: Password show/hide toggle; "Forgot password?" link opens a clean modal — user enters email and receives a reset link (see Email Setup below).
+- **Reset password flow**: New `/reset-password` page (token + email from the link, sets new password via backend, handles expiry gracefully).
+- **Email confirmation on register**: On successful registration, a verification email is sent (if SMTP is configured). A `/api/verify-email` endpoint verifies the token and redirects to `/login?verified=true`, where a green banner appears.
+- **Sign out confirmation modal**: Clicking "Sign Out" in sidebar or mobile menu opens a confirmation modal ("Stay" / "Sign Out").
+- **User-specific dashboard**: Campaigns now live in Replit DB per user (`campaigns_${email}`). Home overview computes stats (budget, active campaigns, leads, conv rate) from the logged-in user's real data. New users start at zero.
+- **Campaigns CRUD**: Full create/edit/delete/status-toggle via REST API (`/api/campaigns`). Each user only sees their own campaigns.
+- **Admin "Registered Users" panel**: First registered user is flagged `isAdmin:true`. When logged in as admin, a "Registered Users" tab appears in Settings showing all accounts with name, email, join date, and verification status.
+- **Email system** (`api/mailer.js`): Nodemailer integration — gracefully skips sending if `EMAIL_USER`/`EMAIL_PASS` env vars are not set (logs to console instead). Configure with Gmail credentials to enable real email.
+
+### Email Setup (optional but recommended)
+Set these two environment variables to enable email sending:
+- `EMAIL_USER` — your Gmail address
+- `EMAIL_PASS` — your Gmail App Password (generate at myaccount.google.com → Security → App passwords)
+
 ## Recent Changes (March 19, 2026)
 
 ### Dark Mode (Full App)

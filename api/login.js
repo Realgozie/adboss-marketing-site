@@ -21,11 +21,12 @@ export default async function handler(req, res) {
       const valid = await bcrypt.compare(password, user.password);
       
       if (valid) {
+        const isAdmin = users[0]?.email === user.email;
         console.log("Login successful for:", email);
         return res.status(200).json({
           success: true,
           message: "Login successful",
-          user: { name: user.name, email: user.email },
+          user: { name: user.name, email: user.email, isAdmin },
         });
       }
     }

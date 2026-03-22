@@ -1,10 +1,13 @@
-
-import express from 'express';
-import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import registerHandler from './api/register.js';
-import loginHandler from './api/login.js';
+import express from "express";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+import registerHandler from "./api/register.js";
+import loginHandler from "./api/login.js";
+import campaignsHandler from "./api/campaigns.js";
+import adminHandler from "./api/admin.js";
+import { forgotPasswordHandler, resetPasswordHandler } from "./api/forgot-password.js";
+import verifyEmailHandler from "./api/verify-email.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,19 +19,37 @@ app.use(cors());
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   next();
 });
 
-app.post('/api/register', registerHandler);
-app.post('/api/login', loginHandler);
+// Auth
+app.post("/api/register", registerHandler);
+app.post("/api/login", loginHandler);
+app.get("/api/verify-email", verifyEmailHandler);
 
-app.use(express.static(path.join(__dirname, 'dist')));
+// Forgot / Reset password
+app.post("/api/forgot-password", forgotPasswordHandler);
+app.post("/api/reset-password", resetPasswordHandler);
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+// Campaigns (per-user)
+app.get("/api/campaigns", campaignsHandler);
+app.post("/api/campaigns", campaignsHandler);
+app.put("/api/campaigns", campaignsHandler);
+app.delete("/api/campaigns", campaignsHandler);
+
+// Admin
+app.get("/api/admin/users", (req, res) => {
+  req.path = "/users";
+  adminHandler(req, res);
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// Serve frontend
+app.use(express.static(path.join(__dirname, "dist")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
 });

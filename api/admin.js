@@ -10,19 +10,20 @@ export default async function handler(req, res) {
     const userData = await db.get("users");
     const users = Array.isArray(userData) ? userData : (userData?.value || []);
 
-    // Only the first registered user (admin) can access this
-    const admin = users[0];
-    if (!admin || admin.email !== email) {
+    // Admin = ADMIN_EMAIL env var if set, otherwise the first registered user
+    const adminEmail = (process.env.ADMIN_EMAIL || "").toLowerCase().trim();
+    const isAdmin = adminEmail ? email === adminEmail : users[0]?.email === email;
+    if (!isAdmin) {
       return res.status(403).json({ success: false, message: "Admin access required" });
     }
 
     if (req.method === "GET" && req.path === "/users") {
-      const safeUsers = users.map((u, i) => ({
+      const safeUsers = users.map((u) => ({
         name: u.name,
         email: u.email,
         joinedAt: u.joinedAt || null,
         isVerified: u.isVerified || false,
-        isAdmin: i === 0,
+        isAdmin: adminEmail ? u.email === adminEmail : u.email === users[0]?.email,
       }));
       return res.json({ success: true, users: safeUsers, total: safeUsers.length });
     }

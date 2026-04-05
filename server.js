@@ -7,6 +7,8 @@ import loginHandler from "./api/login.js";
 import campaignsHandler from "./api/campaigns.js";
 import adminHandler from "./api/admin.js";
 import teamHandler from "./api/team.js";
+import sessionsHandler from "./api/sessions.js";
+import twoFAHandler from "./api/2fa.js";
 import { forgotPasswordHandler, resetPasswordHandler } from "./api/forgot-password.js";
 import verifyEmailHandler from "./api/verify-email.js";
 
@@ -44,6 +46,18 @@ app.get("/api/team", teamHandler);
 app.post("/api/team", teamHandler);
 app.put("/api/team", teamHandler);
 app.delete("/api/team", teamHandler);
+
+// Sessions (per-user)
+app.get("/api/sessions", sessionsHandler);
+app.delete("/api/sessions", sessionsHandler);
+app.put("/api/sessions", sessionsHandler);
+
+// Two-Factor Authentication
+app.get("/api/2fa", (req, res) => { req.path = "/status"; twoFAHandler(req, res); });
+app.post("/api/2fa/setup", (req, res) => { req.path = "/setup"; twoFAHandler(req, res); });
+app.post("/api/2fa/verify", (req, res) => { req.path = "/verify"; twoFAHandler(req, res); });
+app.post("/api/2fa/disable", (req, res) => { req.path = "/disable"; twoFAHandler(req, res); });
+app.post("/api/2fa/check", (req, res) => { req.path = "/check"; twoFAHandler(req, res); });
 
 // Admin
 app.get("/api/admin/users", (req, res) => {

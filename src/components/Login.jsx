@@ -19,6 +19,13 @@ export default function Login() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
 
+  // 2FA state
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [pending2FAEmail, setPending2FAEmail] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [totpLoading, setTotpLoading] = useState(false);
+  const [totpError, setTotpError] = useState("");
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -32,7 +39,11 @@ export default function Login() {
       const data = await response.json();
       if (data.success) {
         localStorage.setItem("user", JSON.stringify(data.user));
+        if (data.sessionId) localStorage.setItem("sessionId", data.sessionId);
         navigate("/dashboard");
+      } else if (data.requires2FA) {
+        setPending2FAEmail(data.email);
+        setRequires2FA(true);
       } else {
         setError(data.message || "Invalid email or password");
       }
@@ -40,6 +51,33 @@ export default function Login() {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handle2FASubmit = async (e) => {
+    e.preventDefault();
+    if (totpCode.replace(/\s/g, "").length !== 6) return setTotpError("Enter the 6-digit code from your authenticator app.");
+    setTotpLoading(true);
+    setTotpError("");
+    try {
+      const res = await fetch("/api/2fa/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: totpCode.replace(/\s/g, ""), loginEmail: pending2FAEmail }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        if (data.sessionId) localStorage.setItem("sessionId", data.sessionId);
+        navigate("/dashboard");
+      } else {
+        setTotpError(data.message || "Invalid code.");
+        setTotpCode("");
+      }
+    } catch {
+      setTotpError("Something went wrong. Please try again.");
+    } finally {
+      setTotpLoading(false);
     }
   };
 
@@ -67,6 +105,61 @@ export default function Login() {
     setForgotSuccess(false);
     setForgotLoading(false);
   };
+
+  // 2FA verification screen
+  if (requires2FA) {
+    return (
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-blue-500 dark:from-slate-950 dark:to-slate-900 p-6 transition-colors duration-300">
+        <form
+          onSubmit={handle2FASubmit}
+          className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl w-full max-w-md border border-transparent dark:border-slate-800"
+        >
+          <div className="text-center mb-6">
+            <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">🔐</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Two-Factor Auth</h2>
+            <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">
+              Enter the 6-digit code from your authenticator app for<br />
+              <span className="font-bold text-slate-600 dark:text-slate-300">{pending2FAEmail}</span>
+            </p>
+          </div>
+
+          {totpError && (
+            <div className="mb-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-bold px-4 py-3 rounded-xl border border-red-200 dark:border-red-900">
+              {totpError}
+            </div>
+          )}
+
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="000000"
+            value={totpCode}
+            onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            className="w-full px-4 py-4 text-center text-3xl font-black tracking-[0.4em] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white transition-colors mb-4"
+            autoFocus
+            required
+          />
+
+          <button
+            type="submit"
+            disabled={totpLoading || totpCode.length !== 6}
+            className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-bold transition-all disabled:opacity-50 mb-3"
+          >
+            {totpLoading ? "Verifying…" : "Verify Code"}
+          </button>
+          <button
+            type="button"
+            onClick={() => { setRequires2FA(false); setTotpCode(""); setTotpError(""); }}
+            className="w-full py-2.5 text-slate-500 dark:text-slate-400 text-sm font-semibold hover:text-slate-900 dark:hover:text-white transition-colors"
+          >
+            ← Back to Login
+          </button>
+        </form>
+      </section>
+    );
+  }
 
   return (
     <>

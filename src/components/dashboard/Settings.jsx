@@ -57,7 +57,6 @@ export default function Settings({ user }) {
 
   const [passwords, setPasswords] = useState({ current: "", newPass: "", confirm: "" });
   const [showPass, setShowPass] = useState({ current: false, new: false, confirm: false });
-  const [twoFactor, setTwoFactor] = useState(false);
 
   const [notifs, setNotifs] = useState({
     emailCampaign: true, emailLeads: true, emailBilling: true,
@@ -152,6 +151,168 @@ export default function Settings({ user }) {
     }
   };
 
+  // ── SESSIONS ──────────────────────────────────────────────────────────
+  const [sessions, setSessions] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+
+  const sessionHeaders = () => ({
+    "Content-Type": "application/json",
+    "x-user-email": user?.email || "",
+    "x-session-id": localStorage.getItem("sessionId") || "",
+  });
+
+  const fetchSessions = async () => {
+    if (!user?.email) return;
+    setSessionsLoading(true);
+    try {
+      const res = await fetch("/api/sessions", { headers: sessionHeaders() });
+      const data = await res.json();
+      if (data.success) setSessions(data.sessions);
+    } catch {
+      toast.error("Failed to load sessions");
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  const revokeSession = async (id) => {
+    try {
+      const res = await fetch("/api/sessions", {
+        method: "DELETE",
+        headers: sessionHeaders(),
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSessions((prev) => prev.filter((s) => s.id !== id));
+        toast.success("Session revoked");
+      } else {
+        toast.error(data.message || "Failed to revoke session");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    }
+  };
+
+  const revokeAllOtherSessions = async () => {
+    try {
+      const res = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: sessionHeaders(),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchSessions();
+        toast.success(`Signed out of ${data.count} other session${data.count !== 1 ? "s" : ""}`);
+      }
+    } catch {
+      toast.error("Something went wrong");
+    }
+  };
+
+  // ── TWO-FACTOR AUTH ───────────────────────────────────────────────────
+  const [twoFactor, setTwoFactor] = useState(false);
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+  const [setupStep, setSetupStep] = useState(null); // null | "qr" | "verify"
+  const [setupQR, setSetupQR] = useState("");
+  const [setupSecret, setSetupSecret] = useState("");
+  const [setupCode, setSetupCode] = useState("");
+  const [disableCode, setDisableCode] = useState("");
+  const [showDisableInput, setShowDisableInput] = useState(false);
+
+  const twoFAHeaders = () => ({
+    "Content-Type": "application/json",
+    "x-user-email": user?.email || "",
+  });
+
+  const fetch2FAStatus = async () => {
+    if (!user?.email) return;
+    try {
+      const res = await fetch("/api/2fa", { headers: twoFAHeaders() });
+      const data = await res.json();
+      if (data.success) setTwoFactor(data.enabled);
+    } catch {}
+  };
+
+  const start2FASetup = async () => {
+    setTwoFactorLoading(true);
+    try {
+      const res = await fetch("/api/2fa/setup", { method: "POST", headers: twoFAHeaders() });
+      const data = await res.json();
+      if (data.success) {
+        setSetupQR(data.qrCode);
+        setSetupSecret(data.secret);
+        setSetupStep("qr");
+      } else {
+        toast.error(data.message || "Failed to start 2FA setup");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const verify2FASetup = async () => {
+    if (setupCode.length !== 6) return toast.error("Enter the 6-digit code");
+    setTwoFactorLoading(true);
+    try {
+      const res = await fetch("/api/2fa/verify", {
+        method: "POST",
+        headers: twoFAHeaders(),
+        body: JSON.stringify({ code: setupCode }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTwoFactor(true);
+        setSetupStep(null);
+        setSetupCode("");
+        toast.success("2FA enabled successfully!");
+      } else {
+        toast.error(data.message || "Invalid code");
+        setSetupCode("");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const disable2FA = async () => {
+    if (disableCode.length !== 6) return toast.error("Enter your current 6-digit code");
+    setTwoFactorLoading(true);
+    try {
+      const res = await fetch("/api/2fa/disable", {
+        method: "POST",
+        headers: twoFAHeaders(),
+        body: JSON.stringify({ code: disableCode }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTwoFactor(false);
+        setShowDisableInput(false);
+        setDisableCode("");
+        toast.success("2FA disabled");
+      } else {
+        toast.error(data.message || "Invalid code");
+        setDisableCode("");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "security") {
+      fetchSessions();
+      fetch2FAStatus();
+    }
+  }, [activeTab]);
+
+  // ── REGISTERED USERS ─────────────────────────────────────────────────
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
 
@@ -324,53 +485,209 @@ export default function Settings({ user }) {
                     </div>
                   </div>
 
+                  {/* ── TWO-FACTOR AUTHENTICATION ── */}
                   <div className="border-t border-slate-100 dark:border-slate-800 pt-8">
                     <h4 className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-4">Two-Factor Authentication</h4>
-                    <div className="flex items-start justify-between p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
-                      <div className="flex items-start gap-4">
-                        <div className={cn("p-3 rounded-xl shrink-0", twoFactor ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400")}>
-                          <ShieldCheckIcon className="h-5 w-5" />
+
+                    {/* Disabled → show enable button */}
+                    {!twoFactor && setupStep === null && (
+                      <div className="flex items-start justify-between p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 rounded-xl shrink-0 bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                            <ShieldCheckIcon className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 dark:text-white text-sm">2FA is Disabled</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Add an extra layer of security using your authenticator app.</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900 dark:text-white text-sm">{twoFactor ? "2FA is Enabled" : "2FA is Disabled"}</p>
-                          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Add an extra layer of security using your phone.</p>
+                        <button
+                          onClick={start2FASetup}
+                          disabled={twoFactorLoading}
+                          className="shrink-0 px-4 py-2 rounded-xl font-black text-xs bg-blue-600 text-white hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                        >
+                          {twoFactorLoading ? "Loading…" : "Enable 2FA"}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Setup step 1: QR code */}
+                    {setupStep === "qr" && (
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                            <ShieldCheckIcon className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 dark:text-white text-sm">Scan QR Code</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500">Open Google Authenticator, Authy, or any TOTP app and scan this code.</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-center">
+                          {setupQR && <img src={setupQR} alt="2FA QR Code" className="w-48 h-48 rounded-xl border border-slate-200 dark:border-slate-700 bg-white p-2" />}
+                        </div>
+                        <div className="bg-slate-100 dark:bg-slate-800 rounded-xl p-3">
+                          <p className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Manual entry code</p>
+                          <p className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300 break-all">{setupSecret}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setSetupStep("verify")}
+                            className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-700 transition-all active:scale-95"
+                          >
+                            I've scanned it →
+                          </button>
+                          <button
+                            onClick={() => { setSetupStep(null); setSetupQR(""); setSetupSecret(""); }}
+                            className="px-4 py-2.5 text-slate-400 hover:text-slate-700 dark:hover:text-white text-sm font-bold transition-colors"
+                          >
+                            Cancel
+                          </button>
                         </div>
                       </div>
-                      <button
-                        onClick={() => { setTwoFactor(!twoFactor); toast.success(twoFactor ? "2FA disabled" : "2FA enabled!"); }}
-                        className={cn("shrink-0 px-4 py-2 rounded-xl font-black text-xs transition-all active:scale-95", twoFactor ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50" : "bg-blue-600 text-white hover:bg-blue-700")}
-                      >
-                        {twoFactor ? "Disable 2FA" : "Enable 2FA"}
-                      </button>
-                    </div>
-                  </div>
+                    )}
 
-                  <div className="border-t border-slate-100 dark:border-slate-800 pt-8">
-                    <h4 className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-4">Active Sessions</h4>
-                    <div className="space-y-3">
-                      {[
-                        { device: "Chrome on Windows", location: "Lagos, Nigeria", time: "Current session", icon: ComputerDesktopIcon, current: true },
-                        { device: "Safari on iPhone", location: "Abuja, Nigeria", time: "2 hours ago", icon: DevicePhoneMobileIcon, current: false },
-                      ].map((session, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400">
-                              <session.icon className="h-4 w-4" />
+                    {/* Setup step 2: verify code */}
+                    {setupStep === "verify" && (
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+                        <div>
+                          <p className="font-bold text-slate-900 dark:text-white text-sm">Enter the 6-digit code</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Enter the code shown in your authenticator app to confirm setup.</p>
+                        </div>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="000000"
+                          value={setupCode}
+                          onChange={(e) => setSetupCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          className="w-full px-4 py-3 text-center text-2xl font-black tracking-[0.4em] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                          autoFocus
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={verify2FASetup}
+                            disabled={twoFactorLoading || setupCode.length !== 6}
+                            className="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl font-black text-sm hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
+                          >
+                            {twoFactorLoading ? "Verifying…" : "Confirm & Enable"}
+                          </button>
+                          <button
+                            onClick={() => setSetupStep("qr")}
+                            className="px-4 py-2.5 text-slate-400 hover:text-slate-700 dark:hover:text-white text-sm font-bold transition-colors"
+                          >
+                            ← Back
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Enabled state */}
+                    {twoFactor && (
+                      <div className="p-5 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 rounded-xl shrink-0 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                              <ShieldCheckIcon className="h-5 w-5" />
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{session.device}</p>
-                              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{session.location} · {session.time}</p>
+                              <p className="font-bold text-slate-900 dark:text-white text-sm">2FA is Enabled</p>
+                              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">Your account is protected with an authenticator app.</p>
                             </div>
                           </div>
-                          {session.current ? (
-                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>Active
-                            </span>
-                          ) : (
-                            <button onClick={() => toast.success("Session revoked")} className="text-xs font-bold text-red-500 hover:underline">Revoke</button>
-                          )}
+                          <button
+                            onClick={() => setShowDisableInput(!showDisableInput)}
+                            className="shrink-0 px-4 py-2 rounded-xl font-black text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all active:scale-95"
+                          >
+                            Disable 2FA
+                          </button>
                         </div>
-                      ))}
+                        {showDisableInput && (
+                          <div className="border-t border-emerald-100 dark:border-emerald-900/30 pt-3 space-y-3">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Enter your current authenticator code to disable 2FA:</p>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              placeholder="000000"
+                              value={disableCode}
+                              onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                              className="w-full px-4 py-2.5 text-center text-xl font-black tracking-[0.4em] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                              autoFocus
+                            />
+                            <button
+                              onClick={disable2FA}
+                              disabled={twoFactorLoading || disableCode.length !== 6}
+                              className="w-full py-2 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-700 transition-all active:scale-95 disabled:opacity-50"
+                            >
+                              {twoFactorLoading ? "Disabling…" : "Confirm Disable"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── ACTIVE SESSIONS ── */}
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Active Sessions</h4>
+                      <div className="flex items-center gap-2">
+                        {sessions.filter((s) => !s.isCurrent).length > 0 && (
+                          <button
+                            onClick={revokeAllOtherSessions}
+                            className="text-xs font-bold text-red-500 hover:underline"
+                          >
+                            Sign out all others
+                          </button>
+                        )}
+                        <button onClick={fetchSessions} className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                          <ArrowPathIcon className={cn("h-3.5 w-3.5", sessionsLoading && "animate-spin")} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {sessionsLoading ? (
+                        <div className="flex justify-center py-6">
+                          <ArrowPathIcon className="h-5 w-5 text-slate-400 animate-spin" />
+                        </div>
+                      ) : sessions.length === 0 ? (
+                        <div className="text-center py-6 text-slate-400 text-sm">No session data yet. Log in again to start tracking sessions.</div>
+                      ) : (
+                        sessions.map((session) => {
+                          const Icon = session.type === "mobile" ? DevicePhoneMobileIcon : ComputerDesktopIcon;
+                          const timeAgo = (() => {
+                            const diff = Date.now() - new Date(session.lastSeen).getTime();
+                            const mins = Math.floor(diff / 60000);
+                            if (mins < 2) return "Just now";
+                            if (mins < 60) return `${mins} mins ago`;
+                            const hrs = Math.floor(mins / 60);
+                            if (hrs < 24) return `${hrs} hour${hrs !== 1 ? "s" : ""} ago`;
+                            return `${Math.floor(hrs / 24)} day${Math.floor(hrs / 24) !== 1 ? "s" : ""} ago`;
+                          })();
+
+                          return (
+                            <div key={session.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400">
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{session.device}</p>
+                                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                                    {session.ip !== "Unknown" ? `${session.ip} · ` : ""}{timeAgo}
+                                  </p>
+                                </div>
+                              </div>
+                              {session.isCurrent ? (
+                                <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>Active
+                                </span>
+                              ) : (
+                                <button onClick={() => revokeSession(session.id)} className="text-xs font-bold text-red-500 hover:underline">Revoke</button>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
 

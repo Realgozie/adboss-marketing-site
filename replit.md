@@ -8,6 +8,18 @@ AdBoss is a marketing website built as a single-page application using React and
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (April 5, 2026)
+
+### Professional & CPA-Ready Site Additions
+- **Pricing page** (`/pricing`): Full 3-tier pricing (Starter free / Growth $49 / Scale $149), monthly/yearly toggle with 20% discount, feature comparison, trust badges, FAQ accordion, bottom CTA section.
+- **Privacy Policy** (`/privacy`): Comprehensive 10-section policy covering data collection, cookies, GDPR rights, data security, children's privacy, retention, and contact info.
+- **Terms of Service** (`/terms`): Full 14-section ToS covering acceptance, acceptable use, intellectual property, payment, liability, indemnification, governing law, and termination.
+- **About Us page** (`/about`): Mission/vision/values, full feature breakdown, stats section (10k+ campaigns, $4.2M+ tracked), CTA, responsive.
+- **Cookie Consent Banner**: Appears on first visit after 1.2s delay, stores preference in localStorage (`adboss_cookie_consent`). Accept/Decline/Dismiss options. Links to Privacy Policy.
+- **404 Not Found page**: Clean "page not found" screen with navigation back to Home or Dashboard. Styled consistently with the app.
+- **Header redesign**: Now includes Pricing and About links, a proper "Get Started" CTA button, and a hamburger mobile menu with all links.
+- **Footer redesign**: 4-column footer with brand/social links, Product column (Features, Pricing, Dashboard, Register, Login), Company column (About, Testimonials, Contact, Support), Legal column (Privacy, Terms, Cookie Policy, GDPR). Bottom bar with copyright and "All systems operational" status indicator.
+
 ## Recent Changes (March 22, 2026)
 
 ### Major Feature Update

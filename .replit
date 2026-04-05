@@ -50,3 +50,8 @@ outputType = "webview"
 [nix]
 channel = "stable-25_05"
 packages = ["tree", "opensshWithKerberos"]
+
+[userenv]
+
+[userenv.shared]
+ADMIN_EMAIL = "info.adboss@gmail.com"

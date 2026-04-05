@@ -6,6 +6,7 @@ import registerHandler from "./api/register.js";
 import loginHandler from "./api/login.js";
 import campaignsHandler from "./api/campaigns.js";
 import adminHandler from "./api/admin.js";
+import teamHandler from "./api/team.js";
 import { forgotPasswordHandler, resetPasswordHandler } from "./api/forgot-password.js";
 import verifyEmailHandler from "./api/verify-email.js";
 
@@ -37,6 +38,12 @@ app.get("/api/campaigns", campaignsHandler);
 app.post("/api/campaigns", campaignsHandler);
 app.put("/api/campaigns", campaignsHandler);
 app.delete("/api/campaigns", campaignsHandler);
+
+// Team (per-user)
+app.get("/api/team", teamHandler);
+app.post("/api/team", teamHandler);
+app.put("/api/team", teamHandler);
+app.delete("/api/team", teamHandler);
 
 // Admin
 app.get("/api/admin/users", (req, res) => {

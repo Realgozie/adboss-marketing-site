@@ -45,12 +45,14 @@ const Toggle = ({ enabled, onChange, label, description }) => (
 export default function Settings({ user }) {
   const [activeTab, setActiveTab] = useState("profile");
 
+  const userRole = user?.isAdmin ? "Administrator" : "Member";
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    company: "AdBOSS Marketing",
-    role: "Administrator",
-    timezone: "UTC+1 West Africa Time",
+    company: "",
+    role: userRole,
+    timezone: "UTC",
   });
 
   const [passwords, setPasswords] = useState({ current: "", newPass: "", confirm: "" });
@@ -65,16 +67,39 @@ export default function Settings({ user }) {
 
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("Editor");
-  const [teamMembers, setTeamMembers] = useState([
-    { id: 1, name: user?.name || "You", email: user?.email || "", role: "Administrator", status: "Active", avatar: (user?.name || "U").charAt(0).toUpperCase(), color: "from-blue-500 to-indigo-600" },
-    { id: 2, name: "Sarah Chen", email: "sarah@adboss.com", role: "Editor", status: "Active", avatar: "S", color: "from-violet-500 to-purple-600" },
-    { id: 3, name: "James Okafor", email: "james@adboss.com", role: "Viewer", status: "Pending", avatar: "J", color: "from-emerald-500 to-teal-600" },
-  ]);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamLoading, setTeamLoading] = useState(true);
+  const [inviting, setInviting] = useState(false);
+
+  const teamHeaders = () => ({
+    "Content-Type": "application/json",
+    "x-user-email": user?.email || "",
+    "x-user-name": user?.name || "",
+    "x-user-is-admin": String(!!user?.isAdmin),
+  });
+
+  const fetchTeam = async () => {
+    if (!user?.email) return;
+    setTeamLoading(true);
+    try {
+      const res = await fetch("/api/team", { headers: teamHeaders() });
+      const data = await res.json();
+      if (data.success) setTeamMembers(data.team);
+    } catch {
+      toast.error("Failed to load team");
+    } finally {
+      setTeamLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "team") fetchTeam();
+  }, [activeTab]);
 
   const handleSaveProfile = () => {
     if (!formData.name.trim()) return toast.error("Name is required");
     if (!formData.email.includes("@")) return toast.error("Invalid email");
-    localStorage.setItem("user", JSON.stringify({ ...user, ...formData }));
+    localStorage.setItem("user", JSON.stringify({ ...user, name: formData.name, email: formData.email }));
     toast.success("Profile saved successfully!");
   };
 
@@ -86,25 +111,45 @@ export default function Settings({ user }) {
     toast.success("Password changed successfully!");
   };
 
-  const handleInvite = () => {
+  const handleInvite = async () => {
     if (!inviteEmail.includes("@")) return toast.error("Enter a valid email address");
-    const newMember = {
-      id: Date.now(),
-      name: inviteEmail.split("@")[0],
-      email: inviteEmail,
-      role: inviteRole,
-      status: "Pending",
-      avatar: inviteEmail.charAt(0).toUpperCase(),
-      color: "from-orange-400 to-pink-500",
-    };
-    setTeamMembers([...teamMembers, newMember]);
-    setInviteEmail("");
-    toast.success(`Invite sent to ${inviteEmail}`);
+    setInviting(true);
+    try {
+      const res = await fetch("/api/team", {
+        method: "POST",
+        headers: teamHeaders(),
+        body: JSON.stringify({ memberEmail: inviteEmail, role: inviteRole }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTeamMembers((prev) => [...prev, data.member]);
+        setInviteEmail("");
+        toast.success(`${inviteEmail} added to team!`);
+      } else {
+        toast.error(data.message || "Invite failed");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setInviting(false);
+    }
   };
 
-  const handleRemoveMember = (id) => {
-    setTeamMembers(teamMembers.filter((m) => m.id !== id));
-    toast.success("Member removed");
+  const handleRemoveMember = async (id) => {
+    try {
+      const res = await fetch("/api/team", {
+        method: "DELETE",
+        headers: teamHeaders(),
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTeamMembers((prev) => prev.filter((m) => m.id !== id));
+        toast.success("Member removed");
+      }
+    } catch {
+      toast.error("Failed to remove member");
+    }
   };
 
   const [registeredUsers, setRegisteredUsers] = useState([]);
@@ -459,12 +504,14 @@ export default function Settings({ user }) {
                 <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-black text-slate-900 dark:text-white">Team Members</h3>
-                    <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-0.5">{teamMembers.length} of 5 seats used on your Pro plan.</p>
+                    <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mt-0.5">
+                      {teamLoading ? "Loading…" : `${teamMembers.length} member${teamMembers.length !== 1 ? "s" : ""} on your team`}
+                    </p>
                   </div>
                 </div>
                 <div className="p-8 space-y-6">
                   <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 p-5">
-                    <h4 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Invite New Member</h4>
+                    <h4 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Add Team Member</h4>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="email"
@@ -472,35 +519,48 @@ export default function Settings({ user }) {
                         onChange={(e) => setInviteEmail(e.target.value)}
                         placeholder="colleague@company.com"
                         className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
+                        onKeyDown={(e) => e.key === "Enter" && handleInvite()}
                       />
                       <select
                         value={inviteRole}
                         onChange={(e) => setInviteRole(e.target.value)}
                         className="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-900 dark:text-white"
                       >
-                        <option>Administrator</option>
                         <option>Editor</option>
                         <option>Viewer</option>
+                        <option>Administrator</option>
                       </select>
                       <button
                         onClick={handleInvite}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-700 transition-all active:scale-95 shrink-0"
+                        disabled={inviting}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-700 transition-all active:scale-95 shrink-0 disabled:opacity-60"
                       >
                         <PlusIcon className="h-4 w-4" />
-                        Send Invite
+                        {inviting ? "Adding…" : "Add Member"}
                       </button>
                     </div>
                   </div>
 
                   <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
-                    {teamMembers.map((member) => (
+                    {teamLoading ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="w-6 h-6 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                      </div>
+                    ) : teamMembers.length === 0 ? (
+                      <div className="text-center py-10 text-sm text-slate-400 dark:text-slate-500 font-medium">No team members yet.</div>
+                    ) : teamMembers.map((member) => (
                       <div key={member.id} className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <div className="flex items-center gap-3">
                           <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${member.color} flex items-center justify-center text-white font-black text-sm shrink-0`}>
                             {member.avatar}
                           </div>
                           <div>
-                            <p className="text-sm font-black text-slate-900 dark:text-white">{member.name}</p>
+                            <p className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                              {member.name}
+                              {member.email === user?.email && (
+                                <span className="text-[9px] font-black bg-blue-600 text-white px-1.5 py-0.5 rounded-full">YOU</span>
+                              )}
+                            </p>
                             <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{member.email}</p>
                           </div>
                         </div>
@@ -512,13 +572,10 @@ export default function Settings({ user }) {
                             {member.status}
                           </span>
                           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 hidden sm:block">{member.role}</span>
-                          {member.id !== 1 && (
+                          {!member.isOwner && member.email !== user?.email && (
                             <button onClick={() => handleRemoveMember(member.id)} className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
                               <TrashIcon className="h-4 w-4" />
                             </button>
-                          )}
-                          {member.id === 1 && (
-                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold px-2 py-1">You</span>
                           )}
                         </div>
                       </div>

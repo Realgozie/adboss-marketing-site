@@ -1,5 +1,5 @@
 // src/components/Dashboard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -32,22 +32,40 @@ const mobileNavItems = [
   { id: "settings", name: "Settings", icon: Cog6ToothIcon },
 ];
 
-const NOTIFS = [
-  { id: 1, title: "Campaign 'Summer Sale' went live", time: "2 min ago", color: "bg-emerald-500", read: false },
-  { id: 2, title: "14 new leads from Facebook Ads", time: "15 min ago", color: "bg-blue-500", read: false },
-  { id: 3, title: "Monthly analytics report is ready", time: "1 hour ago", color: "bg-violet-500", read: true },
-  { id: 4, title: "Your subscription renews in 3 days", time: "3 hours ago", color: "bg-amber-400", read: true },
-];
+function notifsKey(email) {
+  return `notifs_${(email || "").toLowerCase()}`;
+}
+
+function loadNotifs(email) {
+  if (!email) return [];
+  try {
+    const raw = localStorage.getItem(notifsKey(email));
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  // First time: welcome notification only
+  const welcome = [
+    {
+      id: Date.now(),
+      title: "Welcome to AdBOSS! Create your first campaign to get started.",
+      time: "just now",
+      color: "bg-blue-500",
+      read: false,
+    },
+  ];
+  localStorage.setItem(notifsKey(email), JSON.stringify(welcome));
+  return welcome;
+}
+
+function saveNotifs(email, notifs) {
+  if (!email) return;
+  localStorage.setItem(notifsKey(email), JSON.stringify(notifs));
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { dark, toggle } = useTheme();
-  const [activeTab, setActiveTab] = useState("overview");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifs, setNotifs] = useState(NOTIFS);
-  const unreadCount = notifs.filter((n) => !n.read).length;
 
+  // Parse user first (synchronous — safe before hooks)
   let user = null;
   try {
     const userData = localStorage.getItem("user");
@@ -56,7 +74,12 @@ export default function Dashboard() {
     localStorage.removeItem("user");
   }
 
+  const [activeTab, setActiveTab] = useState("overview");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifs, setNotifs] = useState(() => loadNotifs(user?.email));
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const unreadCount = notifs.filter((n) => !n.read).length;
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -221,7 +244,7 @@ export default function Dashboard() {
                         <h4 className="font-black text-slate-900 dark:text-white text-sm">Notifications</h4>
                         {unreadCount > 0 && (
                           <button
-                            onClick={() => setNotifs((prev) => prev.map((n) => ({ ...n, read: true })))}
+                            onClick={() => setNotifs((prev) => { const updated = prev.map((n) => ({ ...n, read: true })); saveNotifs(user?.email, updated); return updated; })}
                             className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
                           >
                             Mark all read
@@ -232,7 +255,7 @@ export default function Dashboard() {
                         {notifs.map((n) => (
                           <button
                             key={n.id}
-                            onClick={() => setNotifs((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x))}
+                            onClick={() => setNotifs((prev) => { const updated = prev.map((x) => x.id === n.id ? { ...x, read: true } : x); saveNotifs(user?.email, updated); return updated; })}
                             className={`w-full text-left flex items-start gap-3 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${!n.read ? "bg-blue-50/40 dark:bg-blue-900/10" : ""}`}
                           >
                             <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${n.read ? "bg-slate-300 dark:bg-slate-700" : n.color}`} />

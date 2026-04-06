@@ -105,10 +105,6 @@ export default function Footer() {
             <Link to="/privacy" className="hover:text-slate-300 transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-slate-300 transition-colors">Terms</Link>
             <Link to="/about" className="hover:text-slate-300 transition-colors">About</Link>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-              All systems operational
-            </span>
           </div>
         </div>
       </div>

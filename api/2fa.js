@@ -57,8 +57,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ success: false, message: "No pending 2FA setup. Please restart setup." });
       }
 
-      const result = await verify({ token: code.trim(), secret: user.twoFactorPending });
-      if (!result?.valid) {
+      const isValid = verify({ token: code.trim(), secret: user.twoFactorPending });
+      if (!isValid) {
         return res.status(400).json({ success: false, message: "Invalid code. Please try again." });
       }
 
@@ -88,8 +88,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ success: false, message: "2FA is not enabled" });
       }
 
-      const result = await verify({ token: code.trim(), secret: user.twoFactorSecret });
-      if (!result?.valid) {
+      const isValid = verify({ token: code.trim(), secret: user.twoFactorSecret });
+      if (!isValid) {
         return res.status(400).json({ success: false, message: "Invalid code. 2FA not disabled." });
       }
 
@@ -119,8 +119,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ success: false, message: "2FA not enabled for this account" });
       }
 
-      const result = await verify({ token: code?.trim(), secret: user.twoFactorSecret });
-      if (!result?.valid) {
+      const isValid = verify({ token: code?.trim(), secret: user.twoFactorSecret });
+      if (!isValid) {
         return res.status(400).json({ success: false, message: "Invalid code. Please try again." });
       }
 

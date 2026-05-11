@@ -16,13 +16,15 @@ const FROM = process.env.EMAIL_USER
   ? `"AdBOSS" <${process.env.EMAIL_USER}>`
   : '"AdBOSS" <noreply@adboss.com>';
 
-export async function sendMail({ to, subject, html }) {
+export async function sendMail({ to, subject, html, replyTo }) {
   if (!transporter) {
     console.log(`[MAIL SKIPPED — configure EMAIL_USER & EMAIL_PASS] To: ${to} | Subject: ${subject}`);
     return false;
   }
   try {
-    await transporter.sendMail({ from: FROM, to, subject, html });
+    const mailOptions = { from: FROM, to, subject, html };
+    if (replyTo) mailOptions.replyTo = replyTo;
+    await transporter.sendMail(mailOptions);
     console.log(`[MAIL SENT] To: ${to} | Subject: ${subject}`);
     return true;
   } catch (err) {

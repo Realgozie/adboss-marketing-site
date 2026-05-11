@@ -30,6 +30,7 @@ export default function Messages({ user }) {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [search, setSearch] = useState("");
   const [replyText, setReplyText] = useState("");
+  const [mobileDetail, setMobileDetail] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(getStorageKey(user), JSON.stringify(messages));
@@ -38,6 +39,7 @@ export default function Messages({ user }) {
   const handleSelect = (msg) => {
     setSelectedMessage(msg);
     setReplyText("");
+    setMobileDetail(true);
     // Mark as read
     setMessages((prev) =>
       prev.map((m) => (m.id === msg.id ? { ...m, unread: false } : m))
@@ -47,6 +49,7 @@ export default function Messages({ user }) {
   const handleDelete = (id) => {
     setMessages((prev) => prev.filter((m) => m.id !== id));
     setSelectedMessage(null);
+    setMobileDetail(false);
   };
 
   const handleReply = () => {
@@ -77,8 +80,8 @@ export default function Messages({ user }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-7xl mx-auto h-[calc(100vh-12rem)] flex gap-6"
     >
-      {/* Inbox list */}
-      <div className="w-full lg:w-96 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col shadow-sm overflow-hidden">
+      {/* Inbox list — hidden on mobile when detail is open */}
+      <div className={`${mobileDetail ? "hidden lg:flex" : "flex"} w-full lg:w-96 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 flex-col shadow-sm overflow-hidden`}>
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-black text-slate-900 dark:text-white">Messages</h3>
@@ -137,8 +140,8 @@ export default function Messages({ user }) {
         </div>
       </div>
 
-      {/* Message detail */}
-      <div className="hidden lg:flex flex-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex-col">
+      {/* Message detail — always shown on mobile when a message is selected */}
+      <div className={`${mobileDetail ? "flex" : "hidden lg:flex"} flex-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex-col`}>
         <AnimatePresence mode="wait">
           {selectedMessage ? (
             <motion.div
@@ -150,6 +153,13 @@ export default function Messages({ user }) {
             >
               <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setMobileDetail(false)}
+                    className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                    aria-label="Back to inbox"
+                  >
+                    ← Back
+                  </button>
                   <div className="h-12 w-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-black text-lg">
                     {selectedMessage.sender.charAt(0)}
                   </div>

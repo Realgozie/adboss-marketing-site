@@ -19,19 +19,31 @@ export default function Contact() {
     if (!form.message.trim()) return toast.error("Please enter a message");
 
     setSending(true);
-    // Simulate sending — in production wire to /api/contact
-    await new Promise((r) => setTimeout(r, 1200));
-    setSending(false);
-    setSent(true);
-    toast.success("Message sent! We'll reply within 24 hours.");
-    setForm({ name: "", email: "", subject: "", message: "" });
-    setTimeout(() => setSent(false), 5000);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSent(true);
+        toast.success("Message sent! We'll reply within 24 hours.");
+        setForm({ name: "", email: "", subject: "", message: "" });
+        setTimeout(() => setSent(false), 5000);
+      } else {
+        toast.error(data.message || "Failed to send message. Please try again.");
+      }
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   const contactDetails = [
     { icon: EnvelopeIcon, label: "Email us", value: "info.adboss@gmail.com", href: "mailto:info.adboss@gmail.com" },
     { icon: PhoneIcon, label: "Response time", value: "Within 24 hours", href: null },
-    { icon: MapPinIcon, label: "Based in", value: "Lagos, Nigeria 🇳🇬", href: null },
   ];
 
   return (

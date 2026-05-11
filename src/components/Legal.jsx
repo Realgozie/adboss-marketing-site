@@ -229,7 +229,7 @@ export const TermsOfService = () => (
   </LegalLayout>
 );
 
-export const About = () => {
+export const About = ({ onGetStarted } = {}) => {
   const { dark, toggle } = useTheme();
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
@@ -322,11 +322,17 @@ export const About = () => {
       <section className="py-20 px-6 bg-white dark:bg-slate-950 text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">Ready to grow?</h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium mb-8">Start your free account today. No credit card required.</p>
+          <p className="text-slate-500 dark:text-slate-400 font-medium mb-8">{onGetStarted ? "Head to Campaigns and create your first campaign now." : "Start your free account today. No credit card required."}</p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link to="/register" className="px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black hover:bg-blue-700 transition-all active:scale-95 shadow-lg shadow-blue-100">
-              Get Started Free
-            </Link>
+            {onGetStarted ? (
+              <button onClick={onGetStarted} className="px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black hover:bg-blue-700 transition-all active:scale-95 shadow-lg shadow-blue-100">
+                Go to Campaigns
+              </button>
+            ) : (
+              <Link to="/register" className="px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black hover:bg-blue-700 transition-all active:scale-95 shadow-lg shadow-blue-100">
+                Get Started Free
+              </Link>
+            )}
             <Link to="/pricing" className="px-8 py-3.5 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-black hover:border-blue-600 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
               See Pricing
             </Link>

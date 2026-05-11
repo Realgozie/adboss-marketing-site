@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       return res.status(403).json({ success: false, message: "Admin access required" });
     }
 
-    if (req.method === "GET" && req.path === "/users") {
+    if (req.method === "GET") {
       const safeUsers = users.map((u) => ({
         name: u.name,
         email: u.email,

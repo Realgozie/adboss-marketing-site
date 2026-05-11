@@ -15,12 +15,12 @@ import { cn } from "../../lib/utils";
 const menuItems = [
   { id: "overview", name: "Overview", icon: Squares2X2Icon },
   { id: "campaigns", name: "Campaigns", icon: MegaphoneIcon },
-  { id: "messages", name: "Messages", icon: EnvelopeIcon, badge: 3 },
+  { id: "messages", name: "Messages", icon: EnvelopeIcon },
   { id: "settings", name: "Settings", icon: Cog6ToothIcon },
   { id: "about", name: "About AdBoss", icon: InformationCircleIcon },
 ];
 
-export default function Sidebar({ activeTab, setActiveTab, onLogout, user }) {
+export default function Sidebar({ activeTab, setActiveTab, onLogout, user, unreadMessages = 0 }) {
   return (
     <aside className="w-64 bg-slate-900 hidden lg:flex flex-col sticky top-0 h-screen shrink-0">
       {/* Logo */}
@@ -52,9 +52,9 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, user }) {
           >
             <item.icon className="h-4.5 w-4.5 shrink-0 h-5 w-5" />
             <span>{item.name}</span>
-            {item.badge && (
+            {item.id === "messages" && unreadMessages > 0 && (
               <span className="ml-auto bg-blue-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-                {item.badge}
+                {unreadMessages}
               </span>
             )}
             {activeTab === item.id && (

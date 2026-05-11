@@ -38,7 +38,11 @@ export default async function handler(req, res) {
     await db.set("users", updatedUsers);
 
     // Send confirmation email
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN
+    const baseUrl = process.env.CUSTOM_DOMAIN
+      ? `https://${process.env.CUSTOM_DOMAIN}`
+      : process.env.REPLIT_DEPLOYMENT_DOMAIN
+      ? `https://${process.env.REPLIT_DEPLOYMENT_DOMAIN}`
+      : process.env.REPLIT_DEV_DOMAIN
       ? `https://${process.env.REPLIT_DEV_DOMAIN}`
       : "http://localhost:5000";
     const verifyLink = `${baseUrl}/api/verify-email?token=${verifyToken}&email=${encodeURIComponent(email)}`;

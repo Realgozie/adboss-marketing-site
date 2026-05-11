@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import registerHandler from "./api/register.js";
+import contactHandler from "./api/contact.js";
 import loginHandler from "./api/login.js";
 import campaignsHandler from "./api/campaigns.js";
 import adminHandler from "./api/admin.js";
@@ -58,6 +59,9 @@ app.post("/api/2fa/setup", (req, res) => { req.path = "/setup"; twoFAHandler(req
 app.post("/api/2fa/verify", (req, res) => { req.path = "/verify"; twoFAHandler(req, res); });
 app.post("/api/2fa/disable", (req, res) => { req.path = "/disable"; twoFAHandler(req, res); });
 app.post("/api/2fa/check", (req, res) => { req.path = "/check"; twoFAHandler(req, res); });
+
+// Contact form
+app.post("/api/contact", contactHandler);
 
 // Admin
 app.get("/api/admin/users", (req, res) => {

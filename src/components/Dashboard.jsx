@@ -81,6 +81,18 @@ export default function Dashboard() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const unreadCount = notifs.filter((n) => !n.read).length;
 
+  const unreadMessages = React.useMemo(() => {
+    try {
+      const key = `adboss_messages_${(user?.email || "guest").toLowerCase()}`;
+      const stored = localStorage.getItem(key);
+      if (!stored) return 1; // welcome message is unread by default
+      const msgs = JSON.parse(stored);
+      return Array.isArray(msgs) ? msgs.filter((m) => m.unread).length : 0;
+    } catch {
+      return 0;
+    }
+  }, [activeTab, user?.email]);
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/login");
@@ -118,7 +130,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex font-sans transition-colors duration-300">
       {/* Desktop Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={switchTab} onLogout={() => setShowLogoutModal(true)} user={user} />
+      <Sidebar activeTab={activeTab} setActiveTab={switchTab} onLogout={() => setShowLogoutModal(true)} user={user} unreadMessages={unreadMessages} />
 
       {/* Mobile Slide-out Menu */}
       <AnimatePresence>
@@ -149,7 +161,7 @@ export default function Dashboard() {
                 {[
                   { id: "overview", name: "Overview", icon: Squares2X2Icon },
                   { id: "campaigns", name: "Campaigns", icon: MegaphoneIcon },
-                  { id: "messages", name: "Messages", icon: EnvelopeIcon, badge: 3 },
+                  { id: "messages", name: "Messages", icon: EnvelopeIcon, badge: unreadMessages },
                   { id: "settings", name: "Settings", icon: Cog6ToothIcon },
                   { id: "about", name: "About AdBoss", icon: InformationCircleIcon },
                 ].map((item) => (
@@ -301,7 +313,7 @@ export default function Dashboard() {
             {activeTab === "campaigns" && <Campaigns key="campaigns" user={user} />}
             {activeTab === "messages" && <Messages key="messages" user={user} />}
             {activeTab === "settings" && <Settings key="settings" user={user} />}
-            {activeTab === "about" && <About key="about" />}
+            {activeTab === "about" && <About key="about" onGetStarted={() => switchTab("campaigns")} />}
           </AnimatePresence>
         </main>
       </div>

@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   if (!email)
     return res.status(401).json({ success: false, message: "Unauthorized" });
 
-  const action = req.path?.split("/").pop(); // "setup" | "verify" | "disable" | "check" | "status"
+  const action = req._action || req.path?.split("/").pop(); // "setup" | "verify" | "disable" | "check" | "status"
 
   // POST /api/2fa/setup — generate secret + QR code
   if (action === "setup") {

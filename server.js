@@ -54,20 +54,17 @@ app.delete("/api/sessions", sessionsHandler);
 app.put("/api/sessions", sessionsHandler);
 
 // Two-Factor Authentication
-app.get("/api/2fa", (req, res) => { req.path = "/status"; twoFAHandler(req, res); });
-app.post("/api/2fa/setup", (req, res) => { req.path = "/setup"; twoFAHandler(req, res); });
-app.post("/api/2fa/verify", (req, res) => { req.path = "/verify"; twoFAHandler(req, res); });
-app.post("/api/2fa/disable", (req, res) => { req.path = "/disable"; twoFAHandler(req, res); });
-app.post("/api/2fa/check", (req, res) => { req.path = "/check"; twoFAHandler(req, res); });
+app.get("/api/2fa", (req, res) => { req._action = "status"; twoFAHandler(req, res); });
+app.post("/api/2fa/setup", (req, res) => { req._action = "setup"; twoFAHandler(req, res); });
+app.post("/api/2fa/verify", (req, res) => { req._action = "verify"; twoFAHandler(req, res); });
+app.post("/api/2fa/disable", (req, res) => { req._action = "disable"; twoFAHandler(req, res); });
+app.post("/api/2fa/check", (req, res) => { req._action = "check"; twoFAHandler(req, res); });
 
 // Contact form
 app.post("/api/contact", contactHandler);
 
 // Admin
-app.get("/api/admin/users", (req, res) => {
-  req.path = "/users";
-  adminHandler(req, res);
-});
+app.get("/api/admin/users", adminHandler);
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, "dist")));

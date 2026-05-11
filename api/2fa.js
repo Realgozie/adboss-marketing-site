@@ -1,5 +1,5 @@
 import Database from "@replit/database";
-import { authenticator } from "otplib";
+import { generateSecret, verify as otpVerify } from "otplib";
 import QRCode from "qrcode";
 import { createSession } from "./sessions.js";
 
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   // POST /api/2fa/setup — generate secret + QR code
   if (action === "setup") {
     try {
-      const secret = authenticator.generateSecret();
+      const secret = generateSecret();
       const otpauth = buildOtpURI(email, secret);
       const qrDataUrl = await QRCode.toDataURL(otpauth);
 
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
           });
       }
 
-      const isValid = authenticator.verify({
+      const isValid = otpVerify({
         token: code.trim(),
         secret: user.twoFactorPending,
       });
@@ -114,7 +114,7 @@ export default async function handler(req, res) {
           .json({ success: false, message: "2FA is not enabled" });
       }
 
-      const isValid = authenticator.verify({
+      const isValid = otpVerify({
         token: code.trim(),
         secret: user.twoFactorSecret,
       });
@@ -162,7 +162,7 @@ export default async function handler(req, res) {
           });
       }
 
-      const isValid = authenticator.verify({
+      const isValid = otpVerify({
         token: code?.trim(),
         secret: user.twoFactorSecret,
       });

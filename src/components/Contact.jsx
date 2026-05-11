@@ -28,7 +28,7 @@ export default function Contact() {
       const data = await res.json();
       if (data.success) {
         setSent(true);
-        toast.success("Message sent! We'll reply within 24 hours.");
+        toast.success("Message sent! We'll reply within 48 hours.");
         setForm({ name: "", email: "", subject: "", message: "" });
         setTimeout(() => setSent(false), 5000);
       } else {
@@ -43,7 +43,7 @@ export default function Contact() {
 
   const contactDetails = [
     { icon: EnvelopeIcon, label: "Email us", value: "info.adboss@gmail.com", href: "mailto:info.adboss@gmail.com" },
-    { icon: PhoneIcon, label: "Response time", value: "Within 24 hours", href: null },
+    { icon: PhoneIcon, label: "Response time", value: "Within 48 hours", href: null },
   ];
 
   return (
@@ -116,7 +116,7 @@ export default function Contact() {
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-3xl mb-4">✅</div>
                 <p className="font-black text-slate-900 dark:text-white text-lg mb-1">Message sent!</p>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">We'll get back to you within 24 hours.</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">We'll get back to you within 48 hours.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">

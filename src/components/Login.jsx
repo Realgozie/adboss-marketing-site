@@ -6,6 +6,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const verified = params.get("verified");
+  const registered = params.get("registered");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -171,6 +172,11 @@ export default function Login() {
           <h2 className="text-2xl font-bold mb-2 text-center text-gray-800 dark:text-white">Welcome back</h2>
           <p className="text-center text-slate-400 dark:text-slate-500 text-sm mb-6">Login to your AdBOSS dashboard</p>
 
+          {registered === "true" && (
+            <div className="mb-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold px-4 py-3 rounded-xl border border-emerald-200 dark:border-emerald-800">
+              ✓ Account created! You can now log in.
+            </div>
+          )}
           {verified === "true" && (
             <div className="mb-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold px-4 py-3 rounded-xl border border-emerald-200 dark:border-emerald-800">
               ✓ Email verified! You can now log in.

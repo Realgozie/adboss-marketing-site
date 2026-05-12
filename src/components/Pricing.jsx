@@ -1,16 +1,15 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { CheckIcon, XMarkIcon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 import { useTheme } from "../context/ThemeContext";
 
-const plans = [
+const PLAN_DETAILS = [
   {
     name: "Starter",
     badge: null,
     monthly: 0,
     yearly: 0,
-    monthlyPriceId: null,
-    yearlyPriceId: null,
+    priceKey: null,
     description: "Perfect for freelancers and solo marketers getting started.",
     cta: "Get Started Free",
     ctaType: "link",
@@ -34,8 +33,7 @@ const plans = [
     badge: "Most Popular",
     monthly: 49,
     yearly: 39,
-    monthlyPriceId: process.env.STRIPE_PRICE_GROWTH_MONTHLY || "price_growth_monthly",
-    yearlyPriceId: process.env.STRIPE_PRICE_GROWTH_YEARLY || "price_growth_yearly",
+    priceKey: "growth",
     description: "For growing teams that need real campaign power and collaboration.",
     cta: "Start Free Trial",
     ctaType: "checkout",
@@ -58,8 +56,7 @@ const plans = [
     badge: "Enterprise",
     monthly: 149,
     yearly: 119,
-    monthlyPriceId: process.env.STRIPE_PRICE_SCALE_MONTHLY || "price_scale_monthly",
-    yearlyPriceId: process.env.STRIPE_PRICE_SCALE_YEARLY || "price_scale_yearly",
+    priceKey: "scale",
     description: "For agencies and high-volume advertisers who need full control.",
     cta: "Get Scale Plan",
     ctaType: "checkout",
@@ -114,16 +111,36 @@ export default function Pricing() {
   const [openFaq, setOpenFaq] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [error, setError] = useState("");
+  const [stripeConfig, setStripeConfig] = useState(null);
   const { dark, toggle } = useTheme();
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("/api/stripe/config")
+      .then((r) => r.json())
+      .then((data) => setStripeConfig(data))
+      .catch(() => setStripeConfig({ configured: false, prices: {} }));
+  }, []);
 
   async function handleCheckout(plan) {
     setError("");
+
+    if (!stripeConfig?.configured) {
+      setError("Payments are not configured yet. Please contact support.");
+      return;
+    }
+
+    const priceId = yearly
+      ? stripeConfig.prices?.[plan.priceKey]?.yearly
+      : stripeConfig.prices?.[plan.priceKey]?.monthly;
+
+    if (!priceId) {
+      setError("This plan is not available for purchase yet. Please contact support.");
+      return;
+    }
+
     setLoadingPlan(plan.name);
 
     try {
-      const priceId = yearly ? plan.yearlyPriceId : plan.monthlyPriceId;
-
       let userEmail = null;
       try {
         const session = JSON.parse(localStorage.getItem("adboss_user") || "{}");
@@ -144,7 +161,7 @@ export default function Pricing() {
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        throw new Error(data.error || "Could not start checkout");
+        throw new Error(data.error || "Could not start checkout. Please try again.");
       }
 
       window.location.href = data.url;
@@ -210,7 +227,7 @@ export default function Pricing() {
       {/* Plans */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 items-start">
-          {plans.map((plan) => {
+          {PLAN_DETAILS.map((plan) => {
             const c = colorMap[plan.color];
             const price = yearly ? plan.yearly : plan.monthly;
             const isLoading = loadingPlan === plan.name;
@@ -253,7 +270,7 @@ export default function Pricing() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                         </svg>
-                        Redirecting...
+                        Redirecting to Stripe...
                       </span>
                     ) : plan.cta}
                   </button>

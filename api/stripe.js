@@ -15,7 +15,20 @@ export default async function stripeHandler(req, res) {
   try {
     if (action === "config") {
       const pubKey = process.env.STRIPE_PUBLISHABLE_KEY || "";
-      return res.json({ publishableKey: pubKey });
+      return res.json({
+        publishableKey: pubKey,
+        configured: !!process.env.STRIPE_SECRET_KEY,
+        prices: {
+          growth: {
+            monthly: process.env.STRIPE_PRICE_GROWTH_MONTHLY || "",
+            yearly: process.env.STRIPE_PRICE_GROWTH_YEARLY || "",
+          },
+          scale: {
+            monthly: process.env.STRIPE_PRICE_SCALE_MONTHLY || "",
+            yearly: process.env.STRIPE_PRICE_SCALE_YEARLY || "",
+          },
+        },
+      });
     }
 
     if (action === "checkout") {

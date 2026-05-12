@@ -12,6 +12,7 @@ import sessionsHandler from "./api/sessions.js";
 import twoFAHandler from "./api/2fa.js";
 import { forgotPasswordHandler, resetPasswordHandler } from "./api/forgot-password.js";
 import verifyEmailHandler from "./api/verify-email.js";
+import stripeHandler from "./api/stripe.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+
+// Stripe webhook MUST be registered before express.json() to receive raw Buffer
+app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req, res) => {
+  req._stripeAction = "webhook";
+  stripeHandler(req, res);
+});
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -65,6 +73,12 @@ app.post("/api/contact", contactHandler);
 
 // Admin
 app.get("/api/admin/users", adminHandler);
+
+// Stripe
+app.get("/api/stripe/config", (req, res) => { req._stripeAction = "config"; stripeHandler(req, res); });
+app.post("/api/stripe/checkout", (req, res) => { req._stripeAction = "checkout"; stripeHandler(req, res); });
+app.get("/api/stripe/subscription", (req, res) => { req._stripeAction = "subscription"; stripeHandler(req, res); });
+app.post("/api/stripe/portal", (req, res) => { req._stripeAction = "portal"; stripeHandler(req, res); });
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, "dist")));

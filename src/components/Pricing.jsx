@@ -1,6 +1,5 @@
-// src/components/Pricing.jsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CheckIcon, XMarkIcon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 import { useTheme } from "../context/ThemeContext";
 
@@ -10,8 +9,11 @@ const plans = [
     badge: null,
     monthly: 0,
     yearly: 0,
+    monthlyPriceId: null,
+    yearlyPriceId: null,
     description: "Perfect for freelancers and solo marketers getting started.",
     cta: "Get Started Free",
+    ctaType: "link",
     ctaLink: "/register",
     color: "slate",
     features: [
@@ -32,9 +34,11 @@ const plans = [
     badge: "Most Popular",
     monthly: 49,
     yearly: 39,
+    monthlyPriceId: process.env.STRIPE_PRICE_GROWTH_MONTHLY || "price_growth_monthly",
+    yearlyPriceId: process.env.STRIPE_PRICE_GROWTH_YEARLY || "price_growth_yearly",
     description: "For growing teams that need real campaign power and collaboration.",
     cta: "Start Free Trial",
-    ctaLink: "/register",
+    ctaType: "checkout",
     color: "blue",
     features: [
       { text: "Up to 25 active campaigns", included: true },
@@ -54,9 +58,11 @@ const plans = [
     badge: "Enterprise",
     monthly: 149,
     yearly: 119,
+    monthlyPriceId: process.env.STRIPE_PRICE_SCALE_MONTHLY || "price_scale_monthly",
+    yearlyPriceId: process.env.STRIPE_PRICE_SCALE_YEARLY || "price_scale_yearly",
     description: "For agencies and high-volume advertisers who need full control.",
-    cta: "Contact Sales",
-    ctaLink: "mailto:info.adboss@gmail.com",
+    cta: "Get Scale Plan",
+    ctaType: "checkout",
     color: "violet",
     features: [
       { text: "Unlimited active campaigns", included: true },
@@ -74,15 +80,30 @@ const plans = [
 ];
 
 const colorMap = {
-  slate: { card: "border-slate-200 dark:border-slate-800", btn: "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white", badge: "", price: "text-slate-900 dark:text-white" },
-  blue: { card: "border-blue-500 ring-2 ring-blue-500 shadow-xl shadow-blue-100/60 dark:shadow-blue-900/20", btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 dark:shadow-blue-900/30", badge: "bg-blue-600 text-white", price: "text-blue-600 dark:text-blue-400" },
-  violet: { card: "border-violet-300 dark:border-violet-700", btn: "bg-violet-700 hover:bg-violet-800 text-white", badge: "bg-violet-700 text-white", price: "text-violet-700 dark:text-violet-400" },
+  slate: {
+    card: "border-slate-200 dark:border-slate-800",
+    btn: "bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white",
+    badge: "",
+    price: "text-slate-900 dark:text-white",
+  },
+  blue: {
+    card: "border-blue-500 ring-2 ring-blue-500 shadow-xl shadow-blue-100/60 dark:shadow-blue-900/20",
+    btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 dark:shadow-blue-900/30",
+    badge: "bg-blue-600 text-white",
+    price: "text-blue-600 dark:text-blue-400",
+  },
+  violet: {
+    card: "border-violet-300 dark:border-violet-700",
+    btn: "bg-violet-700 hover:bg-violet-800 text-white",
+    badge: "bg-violet-700 text-white",
+    price: "text-violet-700 dark:text-violet-400",
+  },
 };
 
 const faq = [
   { q: "Can I cancel anytime?", a: "Yes. You can cancel your subscription at any time from your account settings. You'll retain access until the end of your billing period." },
   { q: "Is there a free trial?", a: "Our Growth plan includes a 14-day free trial with no credit card required. You'll only be charged when the trial ends, if you choose to continue." },
-  { q: "What payment methods do you accept?", a: "We accept all major credit cards (Visa, Mastercard, Amex) and bank transfers for annual plans. All payments are processed securely." },
+  { q: "What payment methods do you accept?", a: "We accept all major credit cards (Visa, Mastercard, Amex) and bank transfers for annual plans. All payments are processed securely via Stripe." },
   { q: "Can I upgrade or downgrade?", a: "Absolutely. You can upgrade or downgrade your plan at any time. When upgrading, you'll be charged the prorated difference. When downgrading, the difference rolls over as credit." },
   { q: "Do you offer agency or volume pricing?", a: "Yes. For agencies managing multiple clients or high-volume campaigns, we offer custom pricing. Contact us at info.adboss@gmail.com to discuss your needs." },
   { q: "Is my data secure?", a: "Yes. We use industry-standard encryption, two-factor authentication, and active session monitoring. Your campaign data is stored securely and never sold to third parties." },
@@ -91,7 +112,47 @@ const faq = [
 export default function Pricing() {
   const [yearly, setYearly] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [loadingPlan, setLoadingPlan] = useState(null);
+  const [error, setError] = useState("");
   const { dark, toggle } = useTheme();
+  const navigate = useNavigate();
+
+  async function handleCheckout(plan) {
+    setError("");
+    setLoadingPlan(plan.name);
+
+    try {
+      const priceId = yearly ? plan.yearlyPriceId : plan.monthlyPriceId;
+
+      let userEmail = null;
+      try {
+        const session = JSON.parse(localStorage.getItem("adboss_user") || "{}");
+        userEmail = session.email || null;
+      } catch (_) {}
+
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priceId,
+          planName: plan.name,
+          billing: yearly ? "yearly" : "monthly",
+          userEmail,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Could not start checkout");
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err.message || "Something went wrong. Please try again.");
+      setLoadingPlan(null);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
@@ -137,13 +198,22 @@ export default function Pricing() {
         </div>
       </section>
 
+      {/* Error banner */}
+      {error && (
+        <div className="max-w-xl mx-auto px-6 mb-4">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm font-medium rounded-xl px-4 py-3 text-center">
+            {error}
+          </div>
+        </div>
+      )}
+
       {/* Plans */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 items-start">
           {plans.map((plan) => {
             const c = colorMap[plan.color];
             const price = yearly ? plan.yearly : plan.monthly;
-            const isExternal = plan.ctaLink.startsWith("mailto:");
+            const isLoading = loadingPlan === plan.name;
 
             return (
               <div key={plan.name} className={`relative rounded-3xl border bg-white dark:bg-slate-900 p-8 ${c.card} transition-all`}>
@@ -164,14 +234,29 @@ export default function Pricing() {
                   )}
                 </div>
 
-                {isExternal ? (
-                  <a href={plan.ctaLink} className={`block w-full text-center py-3 rounded-xl font-black text-sm transition-all active:scale-95 mb-8 ${c.btn}`}>
-                    {plan.cta}
-                  </a>
-                ) : (
-                  <Link to={plan.ctaLink} className={`block w-full text-center py-3 rounded-xl font-black text-sm transition-all active:scale-95 mb-8 ${c.btn}`}>
+                {plan.ctaType === "link" ? (
+                  <Link
+                    to={plan.ctaLink}
+                    className={`block w-full text-center py-3 rounded-xl font-black text-sm transition-all active:scale-95 mb-8 ${c.btn}`}
+                  >
                     {plan.cta}
                   </Link>
+                ) : (
+                  <button
+                    onClick={() => handleCheckout(plan)}
+                    disabled={isLoading}
+                    className={`block w-full text-center py-3 rounded-xl font-black text-sm transition-all active:scale-95 mb-8 disabled:opacity-60 disabled:cursor-not-allowed ${c.btn}`}
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Redirecting...
+                      </span>
+                    ) : plan.cta}
+                  </button>
                 )}
 
                 <ul className="space-y-3">
@@ -197,7 +282,7 @@ export default function Pricing() {
       <section className="py-12 px-6 border-y border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { emoji: "🔒", title: "Secure Payments", sub: "256-bit SSL encryption" },
+            { emoji: "🔒", title: "Secure Payments", sub: "Stripe — 256-bit SSL" },
             { emoji: "🔄", title: "Cancel Anytime", sub: "No lock-in contracts" },
             { emoji: "📞", title: "Dedicated Support", sub: "We reply within 24 hours" },
             { emoji: "🌍", title: "GDPR Compliant", sub: "Your data stays private" },

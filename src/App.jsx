@@ -10,6 +10,8 @@ import Dashboard from "./components/Dashboard";
 import ResetPassword from "./components/ResetPassword";
 import GlobalErrorBoundary from "./components/dashboard/ErrorBoundary";
 import Pricing from "./components/Pricing";
+import CheckoutSuccess from "./components/CheckoutSuccess";
+import CheckoutCancel from "./components/CheckoutCancel";
 import NotFound from "./components/NotFound";
 import CookieBanner from "./components/CookieBanner";
 
@@ -31,6 +33,8 @@ export default function App() {
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/checkout/success" element={<CheckoutSuccess />} />
+          <Route path="/checkout/cancel" element={<CheckoutCancel />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/about" element={<About />} />
